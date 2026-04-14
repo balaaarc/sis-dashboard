@@ -8,6 +8,8 @@ import PanelGrid from './components/layout/PanelGrid'
 export default function App() {
   const theme = useSystemStore((s) => s.theme)
   const setReconnectFn = useSystemStore((s) => s.setReconnectFn)
+  const mobileSidebarOpen = useSystemStore((s) => s.mobileSidebarOpen)
+  const setMobileSidebarOpen = useSystemStore((s) => s.setMobileSidebarOpen)
   const { connect } = useWebSocket()
 
   useEffect(() => {
@@ -30,8 +32,14 @@ export default function App() {
       }}
     >
       <TopNavBar />
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
         <LeftSidebar />
+        {/* Mobile sidebar backdrop */}
+        <div
+          className={`mobile-sidebar-backdrop${mobileSidebarOpen ? ' active' : ''}`}
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
         <PanelGrid />
       </div>
     </div>

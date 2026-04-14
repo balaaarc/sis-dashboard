@@ -39,26 +39,28 @@ const THREAT_LEVELS: { level: ThreatLevel; color: string }[] = [
 ]
 
 export default function LeftSidebar() {
-  const collapsed     = useSystemStore((s) => s.sidebarCollapsed)
-  const toggleSidebar = useSystemStore((s) => s.toggleSidebar)
-  const activePanel   = useSystemStore((s) => s.activePanel)
-  const setActivePanel = useSystemStore((s) => s.setActivePanel)
-  const alerts  = useAlertStore((s) => s.alerts)
-  const setFilter = useAlertStore((s) => s.setFilter)
-  const filter  = useAlertStore((s) => s.filter)
-  const isPanelVisible = useSettingsStore((s) => s.isPanelVisible)
+  const collapsed            = useSystemStore((s) => s.sidebarCollapsed)
+  const toggleSidebar        = useSystemStore((s) => s.toggleSidebar)
+  const activePanel          = useSystemStore((s) => s.activePanel)
+  const setActivePanel       = useSystemStore((s) => s.setActivePanel)
+  const mobileSidebarOpen    = useSystemStore((s) => s.mobileSidebarOpen)
+  const setMobileSidebarOpen = useSystemStore((s) => s.setMobileSidebarOpen)
+  const alerts               = useAlertStore((s) => s.alerts)
+  const setFilter            = useAlertStore((s) => s.setFilter)
+  const filter               = useAlertStore((s) => s.filter)
+  const isPanelVisible       = useSettingsStore((s) => s.isPanelVisible)
 
   const alertCountByLevel = (level: ThreatLevel) =>
     alerts.filter((a) => a.threat_level === level && !a.acknowledged).length
 
   const visibleNew = NEW_PANELS.filter((p) => isPanelVisible(p.id))
 
-  function PanelBtn({ panel }: { panel: { id: string; label: string; icon: string }; isNew?: boolean }) {
+  function PanelBtn({ panel }: { panel: { id: string; label: string; icon: string } }) {
     const active = activePanel === panel.id
 
     function handleClick() {
       setActivePanel(panel.id)
-      // Scroll the main content area to the panel
+      setMobileSidebarOpen(false)
       const el = document.getElementById(`panel-${panel.id}`)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -93,6 +95,7 @@ export default function LeftSidebar() {
 
   return (
     <aside
+      className={`sis-sidebar${mobileSidebarOpen ? ' mobile-open' : ''}`}
       style={{
         width: collapsed ? 0 : 240,
         minWidth: collapsed ? 0 : 240,
@@ -107,8 +110,9 @@ export default function LeftSidebar() {
         flexShrink: 0,
       }}
     >
-      {/* Collapse toggle — always visible via absolute positioning */}
+      {/* Collapse toggle — desktop only */}
       <button
+        className="sidebar-collapse-btn"
         onClick={toggleSidebar}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         style={{
@@ -188,9 +192,10 @@ export default function LeftSidebar() {
               return (
                 <button
                   key={family}
-                  onClick={() =>
+                  onClick={() => {
                     setFilter({ sensorFamily: isActive ? 'ALL' : family })
-                  }
+                    setMobileSidebarOpen(false)
+                  }}
                   style={{
                     width: '100%',
                     display: 'flex',

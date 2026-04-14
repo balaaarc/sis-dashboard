@@ -10,6 +10,7 @@ interface SystemState {
   connectionStatus: ConnectionStatus
   activePanel: string
   sidebarCollapsed: boolean
+  mobileSidebarOpen: boolean
   reconnectFn: (() => void) | null
   setHealth: (h: SystemHealth) => void
   setTheme: (t: 'dark' | 'light') => void
@@ -18,6 +19,8 @@ interface SystemState {
   setConnectionStatus: (s: ConnectionStatus) => void
   setActivePanel: (p: string) => void
   toggleSidebar: () => void
+  setMobileSidebarOpen: (open: boolean) => void
+  toggleMobileSidebar: () => void
   setReconnectFn: (fn: () => void) => void
   reconnect: () => void
 }
@@ -36,6 +39,7 @@ export const useSystemStore = create<SystemState>()((set, get) => ({
   connectionStatus: 'connecting',
   activePanel: 'map',
   sidebarCollapsed: false,
+  mobileSidebarOpen: false,
   reconnectFn: null,
 
   setHealth: (h: SystemHealth) => {
@@ -70,6 +74,14 @@ export const useSystemStore = create<SystemState>()((set, get) => ({
 
   toggleSidebar: () => {
     set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed }))
+  },
+
+  setMobileSidebarOpen: (open: boolean) => {
+    set({ mobileSidebarOpen: open })
+  },
+
+  toggleMobileSidebar: () => {
+    set((state) => ({ mobileSidebarOpen: !state.mobileSidebarOpen }))
   },
 
   setReconnectFn: (fn: () => void) => {

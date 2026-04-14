@@ -4,6 +4,7 @@ import PanelMiniView from '../panels/MinimizedViews'
 import { useSystemStore } from '../../store/systemStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { useViewStore } from '../../store/viewStore'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 const LiveMapPanel      = lazy(() => import('../panels/LiveMapPanel'))
 const AlertPanel        = lazy(() => import('../panels/AlertPanel'))
@@ -130,6 +131,7 @@ export default function PanelGrid() {
   const setPanelView  = useViewStore((s) => s.setPanelView)
   const panelViews    = useViewStore((s) => s.panelViews)
   const getView       = (id: string) => panelViews[id] ?? 'normal'
+  const isMobile      = useIsMobile()
 
   // Initialise default-expanded once on mount
   const didInit = useRef(false)
@@ -149,7 +151,7 @@ export default function PanelGrid() {
   // ── Full-screen panels ────────────────────────────────────────────────────
   if (activePanel === 'settings') {
     return (
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: 4, minHeight: 0 }}>
+      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: isMobile ? 2 : 4, minHeight: 0 }}>
         <PanelShell panelId="settings" title="Dashboard Settings" icon="⚙" style={{ flex: 1 }}>
           <Suspense fallback={<PanelFallback name="Settings" />}>
             <SettingsPanel />
@@ -161,7 +163,7 @@ export default function PanelGrid() {
 
   if (activePanel === 'device') {
     return (
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: 4, minHeight: 0 }}>
+      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: isMobile ? 2 : 4, minHeight: 0 }}>
         <PanelShell panelId="device" title="SensiConnect — Device Configuration" icon="🔌" style={{ flex: 1 }}>
           <Suspense fallback={<PanelFallback name="Device Config" />}>
             <DeviceConfigPage />
@@ -227,6 +229,7 @@ export default function PanelGrid() {
         {/* ── Minimised strip ─────────────────────────────────────────── */}
         {stripPanels.length > 0 && (
           <div
+            className="panel-strip-mobile"
             style={{
               height: 76,
               flexShrink: 0,
@@ -273,8 +276,8 @@ export default function PanelGrid() {
         overflowY: 'auto',
         minHeight: 0,
         minWidth: 0,
-        padding: 4,
-        gap: 4,
+        padding: isMobile ? 2 : 4,
+        gap: isMobile ? 2 : 4,
       }}
     >
       {/* Core panels */}
@@ -282,14 +285,17 @@ export default function PanelGrid() {
         <div
           style={{
             display: 'grid',
-            gridTemplateAreas: hasAllCore
+            gridTemplateAreas: (hasAllCore && !isMobile)
               ? `"map map alert" "map map video" "sensors aiml health"`
               : undefined,
-            gridTemplateColumns: hasAllCore ? '2fr 1.5fr 1.5fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
-            gridTemplateRows: hasAllCore ? 'repeat(3, minmax(300px, 1fr))' : undefined,
+            gridTemplateColumns: isMobile
+              ? '1fr'
+              : hasAllCore ? '2fr 1.5fr 1.5fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+            gridTemplateRows: (hasAllCore && !isMobile) ? 'repeat(3, minmax(300px, 1fr))' : undefined,
+            gridAutoRows: isMobile ? 'minmax(280px, auto)' : undefined,
             gap: 4,
             flex: extraPanels.length > 0 ? '0 0 auto' : 1,
-            minHeight: extraPanels.length > 0 ? 300 : 0,
+            minHeight: extraPanels.length > 0 ? (isMobile ? 200 : 300) : 0,
           }}
         >
           {corePanels.map((panel) => {
@@ -322,8 +328,8 @@ export default function PanelGrid() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gridAutoRows: 'minmax(400px, auto)',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
+            gridAutoRows: isMobile ? 'minmax(320px, auto)' : 'minmax(400px, auto)',
             gap: 4,
             flex: '0 0 auto',
             overflow: 'visible',

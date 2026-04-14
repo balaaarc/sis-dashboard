@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAlertStore } from '../../store/alertStore'
+import { useSystemStore } from '../../store/systemStore'
 import ConnectionBadge from '../widgets/ConnectionBadge'
 import ThemeToggle from '../widgets/ThemeToggle'
 import ScenarioSelector from '../widgets/ScenarioSelector'
@@ -18,6 +19,8 @@ export default function TopNavBar() {
   const [site, setSite] = useState(SITES[0])
   const alerts = useAlertStore((s) => s.alerts)
   const unackedCount = alerts.filter((a) => !a.acknowledged).length
+  const toggleMobileSidebar = useSystemStore((s) => s.toggleMobileSidebar)
+  const mobileSidebarOpen = useSystemStore((s) => s.mobileSidebarOpen)
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -34,12 +37,36 @@ export default function TopNavBar() {
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 16px',
-        gap: 16,
+        padding: '0 12px',
+        gap: 10,
         flexShrink: 0,
         zIndex: 100,
       }}
     >
+      {/* Hamburger — mobile only */}
+      <button
+        className="topbar-hamburger"
+        onClick={toggleMobileSidebar}
+        aria-label={mobileSidebarOpen ? 'Close menu' : 'Open menu'}
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 6,
+          border: '1px solid var(--border-color)',
+          background: mobileSidebarOpen ? 'var(--bg-tertiary)' : 'transparent',
+          color: 'var(--text-secondary)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 16,
+          flexShrink: 0,
+          transition: 'all 0.15s',
+        }}
+      >
+        {mobileSidebarOpen ? '✕' : '☰'}
+      </button>
+
       {/* Logo */}
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, flexShrink: 0 }}>
         <span
@@ -60,27 +87,32 @@ export default function TopNavBar() {
       {/* Divider */}
       <div style={{ width: 1, height: 32, background: 'var(--border-color)', flexShrink: 0 }} />
 
-      {/* Site selector */}
-      <select
-        value={site}
-        onChange={(e) => setSite(e.target.value)}
-        style={{ fontSize: 12, padding: '0 8px', height: 32, flexShrink: 0 }}
-      >
-        {SITES.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+      {/* Site selector — hidden on mobile */}
+      <div className="topbar-site" style={{ display: 'contents' }}>
+        <select
+          value={site}
+          onChange={(e) => setSite(e.target.value)}
+          style={{ fontSize: 12, padding: '0 8px', height: 32, flexShrink: 0 }}
+        >
+          {SITES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* Scenario selector */}
-      <ScenarioSelector />
+      {/* Scenario selector — hidden on tablet/mobile */}
+      <div className="topbar-scenario" style={{ display: 'contents' }}>
+        <ScenarioSelector />
+      </div>
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
-      {/* UTC Clock */}
+      {/* UTC Clock — hidden on mobile */}
       <div
+        className="topbar-clock"
         style={{
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 13,
@@ -93,16 +125,13 @@ export default function TopNavBar() {
       </div>
 
       {/* Connection Badge */}
-      <ConnectionBadge />
+      <div className="topbar-connection-badge" style={{ display: 'contents' }}>
+        <ConnectionBadge />
+      </div>
 
       {/* Unacked alert count */}
       {unackedCount > 0 && (
-        <div
-          style={{
-            position: 'relative',
-            flexShrink: 0,
-          }}
-        >
+        <div style={{ position: 'relative', flexShrink: 0 }}>
           <div
             style={{
               minWidth: 22,
@@ -149,7 +178,10 @@ export default function TopNavBar() {
             boxShadow: '0 0 5px var(--sensor-acoustic)',
           }}
         />
-        <span style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}>
+        <span
+          className="topbar-user-label"
+          style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}
+        >
           Operator
         </span>
       </div>
