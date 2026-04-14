@@ -18,6 +18,7 @@ const CommandPanel      = lazy(() => import('../panels/CommandPanel'))
 const AdvancedAIPanel   = lazy(() => import('../panels/AdvancedAIPanel'))
 const WeatherPanel      = lazy(() => import('../panels/WeatherPanel'))
 const SettingsPanel     = lazy(() => import('../panels/SettingsPanel'))
+const DeviceConfigPage  = lazy(() => import('../pages/DeviceConfigPage'))
 
 function PanelFallback({ name }: { name: string }) {
   return (
@@ -145,13 +146,25 @@ export default function PanelGrid() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // ── Settings panel: full-screen ──────────────────────────────────────────
+  // ── Full-screen panels ────────────────────────────────────────────────────
   if (activePanel === 'settings') {
     return (
       <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: 4, minHeight: 0 }}>
         <PanelShell panelId="settings" title="Dashboard Settings" icon="⚙" style={{ flex: 1 }}>
           <Suspense fallback={<PanelFallback name="Settings" />}>
             <SettingsPanel />
+          </Suspense>
+        </PanelShell>
+      </main>
+    )
+  }
+
+  if (activePanel === 'device') {
+    return (
+      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: 4, minHeight: 0 }}>
+        <PanelShell panelId="device" title="SensiConnect — Device Configuration" icon="🔌" style={{ flex: 1 }}>
+          <Suspense fallback={<PanelFallback name="Device Config" />}>
+            <DeviceConfigPage />
           </Suspense>
         </PanelShell>
       </main>

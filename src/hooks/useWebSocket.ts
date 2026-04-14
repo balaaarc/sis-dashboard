@@ -4,7 +4,7 @@ import { useAlertStore } from '../store/alertStore'
 import { useSystemStore } from '../store/systemStore'
 import type { Alert, SensorPayload, Track, ThreatAssessment, SystemHealth, ScenarioType } from '../types/sensors'
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? 'ws://localhost:4000'
+const WS_URL = import.meta.env.VITE_WS_URL ?? 'wss://sis-sse.onrender.com'
 const BACKOFF_DELAYS = [1000, 2000, 4000, 8000, 16000]
 
 export function useWebSocket() {

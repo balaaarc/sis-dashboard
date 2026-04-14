@@ -159,9 +159,10 @@ export default function LeftSidebar() {
               </>
             )}
 
-            {/* Settings */}
+            {/* Device Config + Settings */}
             <div style={{ height: 1, background: 'var(--border-color)', margin: '6px 0' }} />
-            <PanelBtn panel={{ id: 'settings', label: 'Settings', icon: '⚙' }} />
+            <PanelBtn panel={{ id: 'device',   label: 'Device Config', icon: '🔌' }} />
+            <PanelBtn panel={{ id: 'settings', label: 'Settings',      icon: '⚙' }} />
           </div>
 
           {/* Divider */}
