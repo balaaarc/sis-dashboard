@@ -320,21 +320,26 @@ function OverviewTab({ ports, liveSet, selectedPort, onSelect, unit }: {
     <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: isMobile ? '10px' : '16px' }}>
       {/* Metrics strip */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 10, marginBottom: 16 }}>
-        {METRICS.map(m => (
-          <div key={m.label} style={{ background: 'var(--bg-secondary)', borderRadius: 8, padding: '12px 14px', border: '1px solid var(--border-color)' }}>
-            <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'monospace' }}>{m.val}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>{m.label}</div>
-          </div>
-        ))}
+        {METRICS.map((m, i) => {
+          const accentColors = ['var(--sensor-acoustic)', 'var(--accent-blue)', 'var(--sensor-radar)', 'var(--accent-teal)']
+          const color = accentColors[i] || 'var(--accent-blue)'
+          return (
+            <div key={m.label} style={{ background: 'var(--bg-secondary)', borderRadius: 8, padding: '14px 16px', border: '1px solid var(--panel-border)', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: color, opacity: 0.7 }} />
+              <div style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color, fontFamily: 'monospace', lineHeight: 1 }}>{m.val}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 5, fontWeight: 500, letterSpacing: '0.04em' }}>{m.label}</div>
+            </div>
+          )
+        })}
       </div>
 
       {/* 3D device + right panel */}
       <div style={{ display: 'flex', gap: 16, flexWrap: isMobile ? 'wrap' : 'nowrap', alignItems: 'flex-start', marginBottom: 16 }}>
         {/* 3D device card */}
         <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8, overflow: 'hidden', flexShrink: 0, minWidth: isMobile ? '100%' : 400, width: isMobile ? '100%' : 'auto' }}>
-          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{unit.id} — {unit.siteId}</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, padding: '2px 8px', borderRadius: 20, background: 'rgba(16,185,129,0.12)', color: 'var(--sensor-acoustic)' }}>
+          <div style={{ padding: '9px 14px', borderBottom: '1px solid var(--panel-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--panel-header-bg)' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.02em' }}>{unit.id} — {unit.siteId}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, padding: '2px 9px', borderRadius: 20, background: 'rgba(16,185,129,0.12)', color: 'var(--sensor-acoustic)', border: '1px solid rgba(16,185,129,0.2)', fontWeight: 600 }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--sensor-acoustic)', animation: 'sensiPulse 2s ease-in-out infinite' }} />
               Online
             </span>
@@ -869,42 +874,66 @@ export default function DeviceConfigPage() {
       `}</style>
 
       {/* ── Top header bar ─────────────────────────────────────────── */}
-      <div className="device-config-meta" style={{ display:'flex', alignItems:'center', gap: isMobile ? 8 : 12, flexWrap:'wrap', padding: isMobile ? '6px 10px' : '6px 14px', borderBottom:'1px solid var(--border-color)', background:'var(--bg-secondary)', flexShrink:0 }}>
+      <div className="device-config-meta" style={{ display:'flex', alignItems:'center', gap: isMobile ? 8 : 12, flexWrap:'wrap', padding: isMobile ? '7px 10px' : '7px 14px', borderBottom:'1px solid var(--panel-border)', background:'var(--panel-header-bg)', flexShrink:0 }}>
         {/* Unit selector */}
         <div className="device-config-unit-tabs" style={{ display:'flex', gap:4 }}>
           {UNITS.map((u, i) => (
-            <button key={u.id} onClick={() => { setActiveUnit(i); setSelectedPort(null) }} style={{ padding:'4px 12px', border:'none', cursor:'pointer', borderRadius:4, fontSize:11, fontWeight:700, letterSpacing:'0.06em', background: activeUnit===i ? 'rgba(59,130,246,0.2)' : 'var(--bg-tertiary)', color: activeUnit===i ? 'var(--accent-blue)' : 'var(--text-secondary)', border: activeUnit===i ? '1px solid rgba(59,130,246,0.4)' : '1px solid transparent', transition:'all 0.12s' }}>
+            <button key={u.id} onClick={() => { setActiveUnit(i); setSelectedPort(null) }}
+              style={{ padding:'4px 12px', cursor:'pointer', borderRadius:5, fontSize:11, fontWeight:700, letterSpacing:'0.06em',
+                background: activeUnit===i ? 'rgba(59,130,246,0.18)' : 'var(--bg-tertiary)',
+                color: activeUnit===i ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                border: activeUnit===i ? '1px solid rgba(59,130,246,0.35)' : '1px solid var(--border-color)',
+                transition:'all 0.12s' }}>
               {u.id}
             </button>
           ))}
         </div>
         {/* Meta info */}
-        <div style={{ display:'flex', gap: isMobile ? 8 : 16, fontSize:10, color:'var(--text-secondary)', flexWrap:'wrap' }}>
-          <span>Site: <strong style={{ color:'var(--text-primary)', fontFamily:'monospace' }}>{unit.siteId}</strong></span>
-          <span>BOP: <strong style={{ color:'var(--text-primary)', fontFamily:'monospace' }}>{unit.bopId}</strong></span>
+        <div style={{ display:'flex', gap: isMobile ? 8 : 14, fontSize:11, color:'var(--text-secondary)', flexWrap:'wrap' }}>
+          <span>Site: <strong style={{ color:'var(--text-primary)', fontFamily:'monospace', fontSize:10 }}>{unit.siteId}</strong></span>
+          <span>BOP: <strong style={{ color:'var(--text-primary)', fontFamily:'monospace', fontSize:10 }}>{unit.bopId}</strong></span>
           {!isMobile && <>
-            <span>Lat: <strong style={{ color:'var(--accent-teal)', fontFamily:'monospace' }}>{unit.lat}</strong></span>
-            <span>Lon: <strong style={{ color:'var(--accent-teal)', fontFamily:'monospace' }}>{unit.lon}</strong></span>
+            <span>Lat: <strong style={{ color:'var(--accent-teal)', fontFamily:'monospace', fontSize:10 }}>{unit.lat}</strong></span>
+            <span>Lon: <strong style={{ color:'var(--accent-teal)', fontFamily:'monospace', fontSize:10 }}>{unit.lon}</strong></span>
           </>}
         </div>
         <div style={{ flex:1 }} />
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <span style={{ fontSize:10, color:'var(--text-secondary)' }}>Ports active:</span>
-          <span style={{ fontFamily:'monospace', fontWeight:700, fontSize:13, color: liveCount > 0 ? 'var(--sensor-acoustic)' : 'var(--text-secondary)' }}>
-            {liveCount}<span style={{ fontWeight:400, color:'var(--text-secondary)', fontSize:10 }}>/{SC_PORTS.length}</span>
+        <div style={{ display:'flex', alignItems:'center', gap:6, padding:'3px 10px', borderRadius:6, background:'var(--bg-tertiary)', border:'1px solid var(--border-color)' }}>
+          <span style={{ fontSize:10, color:'var(--text-secondary)' }}>Ports active</span>
+          <span style={{ fontFamily:'monospace', fontWeight:700, fontSize:13, color: liveCount > 0 ? 'var(--sensor-acoustic)' : 'var(--text-muted)' }}>
+            {liveCount}<span style={{ fontWeight:400, color:'var(--text-muted)', fontSize:10 }}>/{SC_PORTS.length}</span>
           </span>
         </div>
       </div>
 
       {/* ── Tab nav bar ────────────────────────────────────────────── */}
-      <div style={{ display:'flex', borderBottom:'1px solid var(--border-color)', background:'var(--bg-secondary)', flexShrink:0, overflowX:'auto' }}>
-        {TABS.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ padding: isMobile ? '8px 12px' : '10px 18px', border:'none', background:'transparent', cursor:'pointer', fontSize: isMobile ? 11 : 12, fontWeight: activeTab===tab.id ? 700 : 500, color: activeTab===tab.id ? 'var(--accent-blue)' : 'var(--text-secondary)', borderBottom: activeTab===tab.id ? '2px solid var(--accent-blue)' : '2px solid transparent', transition:'all 0.15s', whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6, flexShrink:0 }}>
-            <span>{tab.icon}</span>
-            {!isMobile && tab.label}
-            {isMobile && tab.label.split(' ')[0]}
-          </button>
-        ))}
+      <div style={{ display:'flex', borderBottom:'1px solid var(--panel-border)', background:'var(--bg-secondary)', flexShrink:0, overflowX:'auto', scrollbarWidth:'none' }}>
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.id
+          return (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: isMobile ? '9px 12px' : '11px 20px',
+                border: 'none',
+                background: isActive ? 'rgba(59,130,246,0.07)' : 'transparent',
+                cursor: 'pointer',
+                fontSize: isMobile ? 11 : 12,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                borderBottom: isActive ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                transition: 'color 0.15s, background 0.15s, border-color 0.15s',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 7,
+                flexShrink: 0,
+              }}>
+              <span style={{ opacity: isActive ? 1 : 0.7 }}>{tab.icon}</span>
+              {!isMobile && tab.label}
+              {isMobile && tab.label.split(' ')[0]}
+            </button>
+          )
+        })}
       </div>
 
       {/* ── Tab content ────────────────────────────────────────────── */}

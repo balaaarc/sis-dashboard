@@ -46,6 +46,42 @@ interface PanelShellProps {
   id?: string
 }
 
+// SVG icon components for crisp cross-platform rendering
+function IconMinimize() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+      <line x1="2" y1="9" x2="10" y2="9"/>
+    </svg>
+  )
+}
+function IconRestore() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="8" height="8" rx="1"/>
+    </svg>
+  )
+}
+function IconExpand() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="7.5,2 10,2 10,4.5"/>
+      <polyline points="4.5,10 2,10 2,7.5"/>
+      <line x1="10" y1="2" x2="6.5" y2="5.5"/>
+      <line x1="2" y1="10" x2="5.5" y2="6.5"/>
+    </svg>
+  )
+}
+function IconCollapse() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="2,5.5 4.5,5.5 4.5,3"/>
+      <polyline points="10,6.5 7.5,6.5 7.5,9"/>
+      <line x1="5.5" y1="5.5" x2="2" y2="2"/>
+      <line x1="6.5" y1="6.5" x2="10" y2="10"/>
+    </svg>
+  )
+}
+
 function HeaderBtn({
   children,
   title,
@@ -63,14 +99,13 @@ function HeaderBtn({
       title={title}
       aria-label={title}
       style={{
-        width: 28,
-        height: 28,
-        borderRadius: 4,
-        border: active ? '1px solid var(--accent-blue)' : '1px solid transparent',
+        width: 26,
+        height: 26,
+        borderRadius: 5,
+        border: active ? '1px solid rgba(59,130,246,0.5)' : '1px solid transparent',
         background: active ? 'rgba(59,130,246,0.15)' : 'transparent',
-        color: active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+        color: active ? 'var(--accent-blue)' : 'var(--text-muted)',
         cursor: 'pointer',
-        fontSize: 12,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -78,12 +113,16 @@ function HeaderBtn({
         flexShrink: 0,
       }}
       onMouseEnter={(e) => {
-        if (!active)
-          (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'
+        if (!active) {
+          ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'
+          ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'
+        }
       }}
       onMouseLeave={(e) => {
-        if (!active)
-          (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'
+        if (!active) {
+          ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)'
+          ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+        }
       }}
     >
       {children}
@@ -128,34 +167,43 @@ export default function PanelShell({
         background: 'var(--panel-bg)',
         border:
           isExpanded || highlight
-            ? '1px solid var(--accent-blue)'
+            ? '1px solid rgba(59,130,246,0.45)'
             : '1px solid var(--panel-border)',
-        borderRadius: 8,
+        borderRadius: 'var(--radius-lg)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
         boxShadow:
           isExpanded || highlight
-            ? '0 0 0 2px rgba(59,130,246,0.25), 0 4px 24px var(--shadow-color)'
-            : '0 4px 24px var(--shadow-color)',
-        backdropFilter: 'blur(8px)',
+            ? '0 0 0 1px rgba(59,130,246,0.2), var(--shadow-panel)'
+            : 'var(--shadow-panel)',
+        backdropFilter: 'blur(12px)',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.3s ease',
         minHeight: 0,
         ...style,
       }}
     >
+      {/* ── Active accent line ──────────────────────────────────────── */}
+      {(isExpanded || highlight) && (
+        <div style={{
+          height: 2,
+          background: 'linear-gradient(90deg, var(--accent-blue), rgba(59,130,246,0.3))',
+          flexShrink: 0,
+        }} />
+      )}
+
       {/* ── Panel Header ─────────────────────────────────────────────── */}
       <div
         onClick={handleHeaderClick}
         style={{
           background: 'var(--panel-header-bg)',
           borderBottom: showMinimized ? 'none' : '1px solid var(--panel-border)',
-          padding: '0 8px',
+          padding: '0 10px 0 12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexShrink: 0,
-          minHeight: 40,
+          minHeight: 'var(--panel-header-height)',
           cursor: isMinimized ? 'pointer' : 'default',
           userSelect: 'none',
         }}
@@ -165,31 +213,33 @@ export default function PanelShell({
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
+            gap: 7,
             fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '0.06em',
+            fontWeight: 700,
+            letterSpacing: '0.07em',
             textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
+            color: (isExpanded || highlight) ? 'var(--text-primary)' : 'rgba(232,240,248,0.7)',
             flex: 1,
             minWidth: 0,
+            transition: 'color 0.2s ease',
           }}
         >
-          {icon && <span style={{ fontSize: 13, flexShrink: 0 }}>{icon}</span>}
+          {icon && <span style={{ fontSize: 14, flexShrink: 0, opacity: 0.9 }}>{icon}</span>}
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {title}
           </span>
           {isExpanded && (
             <span
               style={{
-                fontSize: 10,
-                background: 'rgba(59,130,246,0.2)',
+                fontSize: 9,
+                background: 'rgba(59,130,246,0.18)',
                 color: 'var(--accent-blue)',
-                border: '1px solid rgba(59,130,246,0.4)',
+                border: '1px solid rgba(59,130,246,0.35)',
                 borderRadius: 3,
-                padding: '0 4px',
-                letterSpacing: '0.05em',
+                padding: '1px 5px',
+                letterSpacing: '0.08em',
                 flexShrink: 0,
+                fontWeight: 700,
               }}
             >
               EXPANDED
@@ -210,7 +260,7 @@ export default function PanelShell({
               title={isMinimized ? 'Restore panel' : 'Minimize panel'}
               onClick={() => toggleMinimize(panelId)}
             >
-              {isMinimized ? '⬜' : '▬'}
+              {isMinimized ? <IconRestore /> : <IconMinimize />}
             </HeaderBtn>
           )}
 
@@ -221,7 +271,7 @@ export default function PanelShell({
               onClick={() => toggleExpand(panelId)}
               active={isExpanded}
             >
-              {isExpanded ? '⊡' : '⤢'}
+              {isExpanded ? <IconCollapse /> : <IconExpand />}
             </HeaderBtn>
           )}
         </div>

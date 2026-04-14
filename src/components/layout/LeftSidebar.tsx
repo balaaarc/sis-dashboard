@@ -1,3 +1,4 @@
+import React from 'react'
 import { useSystemStore } from '../../store/systemStore'
 import { useAlertStore } from '../../store/alertStore'
 import { useSettingsStore } from '../../store/settingsStore'
@@ -74,34 +75,69 @@ export default function LeftSidebar() {
           width: '100%',
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
-          padding: '7px 12px',
+          gap: 9,
+          padding: '8px 14px',
           border: 'none',
-          background: active ? 'var(--bg-tertiary)' : 'transparent',
           borderLeft: `2px solid ${active ? 'var(--accent-blue)' : 'transparent'}`,
+          background: active ? 'rgba(59,130,246,0.1)' : 'transparent',
           color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
           cursor: 'pointer',
           fontSize: 12,
           fontWeight: active ? 600 : 400,
           textAlign: 'left',
-          transition: 'all 0.15s ease',
+          transition: 'color 0.15s ease, background 0.15s ease, border-color 0.15s ease',
+        }}
+        onMouseEnter={(e) => {
+          if (!active) {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'
+            ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'
+          }
         }}
       >
-        <span style={{ fontSize: 14 }}>{panel.icon}</span>
-        {panel.label}
+        <span style={{ fontSize: 14, flexShrink: 0 }}>{panel.icon}</span>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {panel.label}
+        </span>
       </button>
     )
   }
+
+  const SectionHeader = ({ children, extra }: { children: React.ReactNode; extra?: React.ReactNode }) => (
+    <div style={{
+      fontSize: 9,
+      fontWeight: 800,
+      letterSpacing: '0.12em',
+      color: 'var(--text-muted)',
+      padding: '10px 14px 5px',
+      textTransform: 'uppercase',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      {children}
+      {extra}
+    </div>
+  )
+
+  const Divider = () => (
+    <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
+  )
 
   return (
     <aside
       className={`sis-sidebar${mobileSidebarOpen ? ' mobile-open' : ''}`}
       style={{
-        width: collapsed ? 0 : 240,
-        minWidth: collapsed ? 0 : 240,
+        width: collapsed ? 0 : 232,
+        minWidth: collapsed ? 0 : 232,
         height: '100%',
-        background: 'var(--bg-secondary)',
-        borderRight: '1px solid var(--border-color)',
+        background: 'var(--panel-header-bg)',
+        borderRight: '1px solid var(--panel-border)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -117,10 +153,10 @@ export default function LeftSidebar() {
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         style={{
           position: 'absolute',
-          top: 8,
-          right: collapsed ? -32 : 8,
-          width: 24,
-          height: 24,
+          top: 9,
+          right: collapsed ? -30 : 8,
+          width: 22,
+          height: 22,
           borderRadius: 4,
           border: '1px solid var(--border-color)',
           background: 'var(--bg-tertiary)',
@@ -129,7 +165,7 @@ export default function LeftSidebar() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 12,
+          fontSize: 11,
           zIndex: 10,
           transition: 'right 200ms ease',
           flexShrink: 0,
@@ -139,24 +175,33 @@ export default function LeftSidebar() {
       </button>
 
       {!collapsed && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1, overflow: 'auto', paddingTop: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1, overflow: 'auto', paddingTop: 4 }}>
           {/* Panel Navigator */}
-          <div style={{ padding: '0 0 8px 0' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', padding: '4px 12px 6px', textTransform: 'uppercase' }}>
-              Panels
-            </div>
+          <div>
+            <SectionHeader>Panels</SectionHeader>
             {CORE_PANELS.map((panel) => (
               <PanelBtn key={panel.id} panel={panel} />
             ))}
 
             {visibleNew.length > 0 && (
               <>
-                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', padding: '8px 12px 4px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <SectionHeader
+                  extra={
+                    <span style={{
+                      fontSize: 9,
+                      background: 'rgba(59,130,246,0.15)',
+                      color: 'var(--accent-blue)',
+                      border: '1px solid rgba(59,130,246,0.25)',
+                      borderRadius: 3,
+                      padding: '1px 5px',
+                      fontWeight: 700,
+                    }}>
+                      {visibleNew.length}
+                    </span>
+                  }
+                >
                   Additional
-                  <span style={{ fontSize: 10, background: 'rgba(34,197,94,0.15)', color: 'var(--sensor-acoustic)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 3, padding: '0 4px' }}>
-                    {visibleNew.length}
-                  </span>
-                </div>
+                </SectionHeader>
                 {visibleNew.map((panel) => (
                   <PanelBtn key={panel.id} panel={panel} />
                 ))}
@@ -164,28 +209,16 @@ export default function LeftSidebar() {
             )}
 
             {/* Device Config + Settings */}
-            <div style={{ height: 1, background: 'var(--border-color)', margin: '6px 0' }} />
+            <Divider />
             <PanelBtn panel={{ id: 'device',   label: 'Device Config', icon: '🔌' }} />
             <PanelBtn panel={{ id: 'settings', label: 'Settings',      icon: '⚙' }} />
           </div>
 
-          {/* Divider */}
-          <div style={{ height: 1, background: 'var(--border-color)', margin: '4px 0' }} />
+          <Divider />
 
           {/* Sensor Family Quick Filters */}
-          <div style={{ padding: '8px 0' }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                color: 'var(--text-secondary)',
-                padding: '4px 12px 6px',
-                textTransform: 'uppercase',
-              }}
-            >
-              Sensor Family
-            </div>
+          <div>
+            <SectionHeader>Sensor Family</SectionHeader>
             {SENSOR_FAMILIES.map((family) => {
               const color = getSensorFamilyColor(family)
               const isActive = filter.sensorFamily === family
@@ -200,15 +233,29 @@ export default function LeftSidebar() {
                     width: '100%',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
-                    padding: '6px 12px',
+                    gap: 9,
+                    padding: '7px 14px',
                     border: 'none',
-                    background: isActive ? `${color}18` : 'transparent',
+                    borderLeft: `2px solid ${isActive ? color : 'transparent'}`,
+                    background: isActive ? `${color}14` : 'transparent',
                     color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                     cursor: 'pointer',
                     fontSize: 12,
                     textAlign: 'left',
-                    transition: 'all 0.15s ease',
+                    transition: 'color 0.15s ease, background 0.15s ease, border-color 0.15s ease',
+                    fontWeight: isActive ? 600 : 400,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'
+                    }
                   }}
                 >
                   <span
@@ -217,8 +264,9 @@ export default function LeftSidebar() {
                       height: 8,
                       borderRadius: '50%',
                       background: color,
-                      boxShadow: isActive ? `0 0 6px ${color}` : 'none',
+                      boxShadow: isActive ? `0 0 7px ${color}` : 'none',
                       flexShrink: 0,
+                      transition: 'box-shadow 0.15s ease',
                     }}
                   />
                   {family}
@@ -227,54 +275,48 @@ export default function LeftSidebar() {
             })}
           </div>
 
-          {/* Divider */}
-          <div style={{ height: 1, background: 'var(--border-color)', margin: '4px 0' }} />
+          <Divider />
 
           {/* Alert Summary */}
-          <div style={{ padding: '8px 12px' }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                color: 'var(--text-secondary)',
-                marginBottom: 8,
-                textTransform: 'uppercase',
-              }}
-            >
-              Active Alerts
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ padding: '8px 14px 12px' }}>
+            <SectionHeader>Active Alerts</SectionHeader>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 4 }}>
               {THREAT_LEVELS.map(({ level, color }) => {
                 const count = alertCountByLevel(level)
+                const isFiltered = filter.threatLevel === level
                 return (
                   <div
                     key={level}
+                    onClick={() =>
+                      setFilter({ threatLevel: isFiltered ? 'ALL' : level })
+                    }
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       cursor: 'pointer',
+                      padding: '4px 6px',
+                      borderRadius: 5,
+                      background: isFiltered ? `${color}12` : 'transparent',
+                      transition: 'background 0.15s ease',
                     }}
-                    onClick={() =>
-                      setFilter({ threatLevel: filter.threatLevel === level ? 'ALL' : level })
-                    }
                   >
-                    <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{level}</span>
+                    <span style={{ fontSize: 11, color: isFiltered ? color : 'var(--text-secondary)', fontWeight: isFiltered ? 600 : 400, transition: 'color 0.15s ease' }}>{level}</span>
                     <span
                       style={{
-                        minWidth: 24,
+                        minWidth: 22,
                         height: 18,
                         borderRadius: 9,
-                        background: count > 0 ? `${color}22` : 'var(--bg-tertiary)',
-                        border: `1px solid ${count > 0 ? `${color}55` : 'transparent'}`,
-                        color: count > 0 ? color : 'var(--text-secondary)',
-                        fontSize: 11,
+                        background: count > 0 ? `${color}20` : 'var(--bg-tertiary)',
+                        border: `1px solid ${count > 0 ? `${color}40` : 'transparent'}`,
+                        color: count > 0 ? color : 'var(--text-muted)',
+                        fontSize: 10,
                         fontWeight: 700,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        padding: '0 6px',
+                        padding: '0 5px',
+                        fontFamily: 'monospace',
                       }}
                     >
                       {count}

@@ -32,15 +32,16 @@ export default function TopNavBar() {
   return (
     <header
       style={{
-        height: 56,
-        background: 'var(--bg-primary)',
-        borderBottom: '1px solid var(--border-color)',
+        height: 'var(--topbar-height, 52px)',
+        background: 'var(--panel-header-bg)',
+        borderBottom: '1px solid var(--panel-border)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 12px',
-        gap: 10,
+        padding: '0 14px',
+        gap: 8,
         flexShrink: 0,
         zIndex: 100,
+        boxShadow: '0 1px 12px rgba(0,0,0,0.3)',
       }}
     >
       {/* Hamburger — mobile only */}
@@ -49,8 +50,8 @@ export default function TopNavBar() {
         onClick={toggleMobileSidebar}
         aria-label={mobileSidebarOpen ? 'Close menu' : 'Open menu'}
         style={{
-          width: 36,
-          height: 36,
+          width: 34,
+          height: 34,
           borderRadius: 6,
           border: '1px solid var(--border-color)',
           background: mobileSidebarOpen ? 'var(--bg-tertiary)' : 'transparent',
@@ -59,7 +60,7 @@ export default function TopNavBar() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 16,
+          fontSize: 15,
           flexShrink: 0,
           transition: 'all 0.15s',
         }}
@@ -68,38 +69,45 @@ export default function TopNavBar() {
       </button>
 
       {/* Logo */}
-      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, flexShrink: 0 }}>
-        <span
-          style={{
-            fontSize: 18,
-            fontWeight: 900,
-            color: 'var(--accent-blue)',
-            letterSpacing: '-0.02em',
-          }}
-        >
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0 }}>
+        <span style={{ fontSize: 17, fontWeight: 900, color: 'var(--accent-blue)', letterSpacing: '-0.02em', lineHeight: 1 }}>
           SIS
         </span>
-        <span style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', fontWeight: 600 }}>
+        <span style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.14em', fontWeight: 700, textTransform: 'uppercase' }}>
           IINVSYS
         </span>
       </div>
 
       {/* Divider */}
-      <div style={{ width: 1, height: 32, background: 'var(--border-color)', flexShrink: 0 }} />
+      <div style={{ width: 1, height: 24, background: 'var(--border-color)', flexShrink: 0 }} />
 
       {/* Site selector — hidden on mobile */}
       <div className="topbar-site" style={{ display: 'contents' }}>
-        <select
-          value={site}
-          onChange={(e) => setSite(e.target.value)}
-          style={{ fontSize: 12, padding: '0 8px', height: 32, flexShrink: 0 }}
-        >
-          {SITES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <select
+            value={site}
+            onChange={(e) => setSite(e.target.value)}
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              padding: '0 24px 0 10px',
+              height: 30,
+              borderRadius: 6,
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-tertiary)',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              outline: 'none',
+            }}
+          >
+            {SITES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <span style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)', fontSize: 9 }}>▾</span>
+        </div>
       </div>
 
       {/* Scenario selector — hidden on tablet/mobile */}
@@ -115,10 +123,14 @@ export default function TopNavBar() {
         className="topbar-clock"
         style={{
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 13,
+          fontSize: 12,
           color: 'var(--text-secondary)',
-          letterSpacing: '0.04em',
+          letterSpacing: '0.05em',
           flexShrink: 0,
+          padding: '4px 8px',
+          background: 'var(--bg-tertiary)',
+          borderRadius: 5,
+          border: '1px solid var(--border-subtle)',
         }}
       >
         {time}
@@ -131,25 +143,22 @@ export default function TopNavBar() {
 
       {/* Unacked alert count */}
       {unackedCount > 0 && (
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <div
-            style={{
-              minWidth: 22,
-              height: 22,
-              borderRadius: 11,
-              background: 'var(--alert-critical)',
-              color: '#fff',
-              fontSize: 11,
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '0 5px',
-              boxShadow: '0 0 8px var(--alert-critical)',
-            }}
-          >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            padding: '3px 8px 3px 7px',
+            borderRadius: 99,
+            background: 'rgba(239,68,68,0.15)',
+            border: '1px solid rgba(239,68,68,0.3)',
+            flexShrink: 0,
+          }}
+        >
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--alert-critical)', boxShadow: '0 0 5px var(--alert-critical)', flexShrink: 0 }} />
+          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--alert-critical)', fontFamily: 'monospace' }}>
             {unackedCount > 99 ? '99+' : unackedCount}
-          </div>
+          </span>
         </div>
       )}
 
@@ -162,8 +171,8 @@ export default function TopNavBar() {
           display: 'flex',
           alignItems: 'center',
           gap: 6,
-          padding: '3px 10px',
-          borderRadius: 9999,
+          padding: '4px 10px',
+          borderRadius: 6,
           background: 'var(--bg-tertiary)',
           border: '1px solid var(--border-color)',
           flexShrink: 0,
@@ -176,6 +185,7 @@ export default function TopNavBar() {
             borderRadius: '50%',
             background: 'var(--sensor-acoustic)',
             boxShadow: '0 0 5px var(--sensor-acoustic)',
+            flexShrink: 0,
           }}
         />
         <span
