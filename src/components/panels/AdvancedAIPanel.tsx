@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSettingsStore } from '../../store/settingsStore'
-import { useAlertStore } from '../../store/alertStore'
-import { useSensorStore } from '../../store/sensorStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { useAlertStore } from '@/store/alertStore'
+import { useSensorStore } from '@/store/sensorStore'
 
 interface HeatCell {
   x: number
@@ -100,14 +100,14 @@ function Heatmap({ cells, timeWindow }: { cells: HeatCell[]; timeWindow: string 
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>
+      <div className="flex justify-between text-[10px] text-text-secondary mb-1">
         <span>Activity density heatmap — {timeWindow} window</span>
         <span>W ← → E</span>
       </div>
       <svg
         width={COLS * cellW + 40}
         height={ROWS * cellH + 20}
-        style={{ display: 'block' }}
+        className="block"
       >
         {/* Y-axis labels */}
         {['N', '', '', '', '', '', '', 'S'].map((l, i) => (
@@ -137,7 +137,7 @@ function Heatmap({ cells, timeWindow }: { cells: HeatCell[]; timeWindow: string 
   )
 }
 
-export default function AdvancedAIPanel() {
+export function AdvancedAIPanel() {
   const [tab, setTab] = useState<'heatmap' | 'falseAlarm' | 'confidence'>('heatmap')
   const [timeWindow, setTimeWindow] = useState<'1h' | '6h' | '24h'>('1h')
   const alerts = useAlertStore((s) => s.alerts)
@@ -163,52 +163,35 @@ export default function AdvancedAIPanel() {
   ] as { id: typeof tab; label: string }[]
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Stats bar */}
-      <div
-        style={{
-          padding: '4px 10px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          flexShrink: 0,
-          fontSize: 10,
-        }}
-      >
-        <span style={{ color: 'var(--text-secondary)' }}>
+      <div className="py-1 px-[10px] border-b border-border-color bg-bg-secondary flex items-center gap-[10px] shrink-0 text-[10px]">
+        <span className="text-text-secondary">
           FAR avg: <strong style={{ color: avgFAR > 0.15 ? 'var(--alert-medium)' : 'var(--sensor-acoustic)' }}>
             {(avgFAR * 100).toFixed(1)}%
           </strong>
         </span>
-        <span style={{ color: 'var(--text-secondary)' }}>
-          Rejected: <strong style={{ color: 'var(--text-primary)' }}>{rejectedCount.current}</strong>
+        <span className="text-text-secondary">
+          Rejected: <strong className="text-text-primary">{rejectedCount.current}</strong>
         </span>
-        <span style={{ color: 'var(--text-secondary)' }}>
-          Alerts (7d): <strong style={{ color: 'var(--text-primary)' }}>{alerts.length + 47}</strong>
+        <span className="text-text-secondary">
+          Alerts (7d): <strong className="text-text-primary">{alerts.length + 47}</strong>
         </span>
       </div>
 
       {/* Sub-tabs */}
       {TABS.length > 1 && (
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+        <div className="flex border-b border-border-color shrink-0">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              style={{
-                flex: 1,
-                padding: '6px 4px',
-                border: 'none',
-                borderBottom: tab === t.id ? '2px solid var(--accent-blue)' : '2px solid transparent',
-                background: 'transparent',
-                color: tab === t.id ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                fontSize: 10,
-                fontWeight: tab === t.id ? 700 : 400,
-                whiteSpace: 'nowrap',
-              }}
+              className={[
+                'flex-1 py-1.5 px-1 border-none bg-transparent cursor-pointer text-[10px] whitespace-nowrap',
+                tab === t.id
+                  ? 'border-b-2 border-accent-blue text-accent-blue font-bold'
+                  : 'border-b-2 border-transparent text-text-secondary font-normal',
+              ].join(' ')}
             >
               {t.label}
             </button>
@@ -216,49 +199,34 @@ export default function AdvancedAIPanel() {
         </div>
       )}
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto">
 
         {/* Heatmap tab */}
         {(tab === 'heatmap' || TABS.length === 0) && showHeatmap && (
-          <div style={{ padding: 10 }}>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          <div className="p-[10px]">
+            <div className="flex gap-1.5 mb-[10px]">
               {(['1h', '6h', '24h'] as const).map((w) => (
                 <button
                   key={w}
                   onClick={() => setTimeWindow(w)}
+                  className="py-[2px] px-[10px] border border-border-color rounded text-[10px] cursor-pointer"
                   style={{
-                    padding: '2px 10px',
                     background: timeWindow === w ? 'var(--accent-blue)' : 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 4,
                     color: timeWindow === w ? '#fff' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 10,
                   }}
                 >
                   {w}
                 </button>
               ))}
-              <button
-                style={{
-                  marginLeft: 'auto',
-                  padding: '2px 8px',
-                  background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 4,
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: 10,
-                }}
-              >
+              <button className="ml-auto py-[2px] px-2 bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]">
                 ⬇ Export PNG
               </button>
             </div>
             <Heatmap cells={heatCells} timeWindow={timeWindow} />
 
             {/* High-activity zones */}
-            <div style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+            <div className="mt-[10px]">
+              <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-1.5">
                 High-activity zones
               </div>
               {heatCells
@@ -266,13 +234,14 @@ export default function AdvancedAIPanel() {
                 .sort((a, b) => b.value - a.value)
                 .slice(0, 3)
                 .map((c) => (
-                  <div key={`${c.x}-${c.y}`} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
+                  <div
+                    key={`${c.x}-${c.y}`}
+                    className="flex justify-between text-[10px] py-[3px] border-b border-white/[0.04] text-text-secondary"
+                  >
                     <span>Grid ({c.x},{c.y})</span>
                     <span
-                      style={{
-                        color: c.value > 0.85 ? 'var(--alert-critical)' : 'var(--alert-medium)',
-                        fontWeight: 700,
-                      }}
+                      className="font-bold"
+                      style={{ color: c.value > 0.85 ? 'var(--alert-critical)' : 'var(--alert-medium)' }}
                     >
                       {(c.value * 100).toFixed(0)}% activity
                     </span>
@@ -284,33 +253,31 @@ export default function AdvancedAIPanel() {
 
         {/* False Alarm Rate tab */}
         {tab === 'falseAlarm' && showFAR && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               Per-sensor false alarm rate — rolling 7 days
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="flex flex-col gap-1.5">
               {Object.entries(falseAlarmRates)
                 .sort(([, a], [, b]) => b - a)
                 .map(([sensorId, rate]) => {
                   const pct = rate * 100
                   const color = pct > 20 ? 'var(--alert-critical)' : pct > 10 ? 'var(--alert-medium)' : 'var(--sensor-acoustic)'
                   return (
-                    <div key={sensorId} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 10, width: 80, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                    <div key={sensorId} className="flex items-center gap-2">
+                      <span className="text-[10px] w-20 text-text-secondary shrink-0">
                         {sensorId}
                       </span>
-                      <div style={{ flex: 1, height: 14, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+                      <div className="flex-1 h-3.5 bg-white/[0.06] rounded-[3px] overflow-hidden">
                         <div
-                          style={{
-                            width: `${Math.min(pct, 100)}%`,
-                            height: '100%',
-                            background: color,
-                            borderRadius: 3,
-                            transition: 'width 0.5s',
-                          }}
+                          className="h-full rounded-[3px] transition-[width] duration-500"
+                          style={{ width: `${Math.min(pct, 100)}%`, background: color }}
                         />
                       </div>
-                      <span style={{ fontSize: 10, width: 40, textAlign: 'right', fontFamily: 'monospace', color, fontWeight: pct > 10 ? 700 : 400, flexShrink: 0 }}>
+                      <span
+                        className="text-[10px] w-10 text-right font-mono shrink-0"
+                        style={{ color, fontWeight: pct > 10 ? 700 : 400 }}
+                      >
                         {pct.toFixed(1)}%
                       </span>
                     </div>
@@ -318,11 +285,11 @@ export default function AdvancedAIPanel() {
                 })}
             </div>
 
-            <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
-              <button style={{ flex: 1, padding: '5px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 10 }}>
+            <div className="mt-[10px] flex gap-1.5">
+              <button className="flex-1 py-[5px] bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]">
                 📄 Rejected Alerts Log
               </button>
-              <button style={{ flex: 1, padding: '5px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 10 }}>
+              <button className="flex-1 py-[5px] bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]">
                 ⬇ Export Audit CSV
               </button>
             </div>
@@ -331,49 +298,44 @@ export default function AdvancedAIPanel() {
 
         {/* Confidence Monitor tab */}
         {tab === 'confidence' && showConfidence && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               Model inference confidence distribution
             </div>
 
             {/* Legend */}
-            <div style={{ display: 'flex', gap: 12, marginBottom: 10, fontSize: 10 }}>
+            <div className="flex gap-3 mb-[10px] text-[10px]">
               {[
                 { label: 'YOLOv9', color: 'var(--accent-blue)' },
                 { label: 'LSTM',   color: 'var(--alert-medium)' },
                 { label: 'RF/Bay', color: 'var(--sensor-acoustic)' },
               ].map((m) => (
-                <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-secondary)' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 2, background: m.color, display: 'inline-block' }} />
+                <div key={m.label} className="flex items-center gap-1 text-text-secondary">
+                  <span className="w-2.5 h-2.5 rounded-[2px] inline-block" style={{ background: m.color }} />
                   {m.label}
                 </div>
               ))}
             </div>
 
             {/* Grouped bar chart */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="flex flex-col gap-2">
               {confidenceBuckets.map((b) => (
                 <div key={b.range}>
-                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 3 }}>{b.range}</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <div className="text-[10px] text-text-secondary mb-[3px]">{b.range}</div>
+                  <div className="flex flex-col gap-[2px]">
                     {[
                       { val: b.yolo, color: 'var(--accent-blue)',    label: 'YOLOv9' },
                       { val: b.lstm, color: 'var(--alert-medium)',   label: 'LSTM'   },
                       { val: b.rf,   color: 'var(--sensor-acoustic)',label: 'RF/Bay' },
                     ].map(({ val, color, label }) => (
-                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ flex: 1, height: 10, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div key={label} className="flex items-center gap-1.5">
+                        <div className="flex-1 h-2.5 bg-white/[0.06] rounded-[2px] overflow-hidden">
                           <div
-                            style={{
-                              width: `${(val / maxBucket) * 100}%`,
-                              height: '100%',
-                              background: color,
-                              borderRadius: 2,
-                              transition: 'width 0.5s',
-                            }}
+                            className="h-full rounded-[2px] transition-[width] duration-500"
+                            style={{ width: `${(val / maxBucket) * 100}%`, background: color }}
                           />
                         </div>
-                        <span style={{ fontSize: 10, width: 20, textAlign: 'right', fontFamily: 'monospace', color: 'var(--text-secondary)' }}>
+                        <span className="text-[10px] w-5 text-right font-mono text-text-secondary">
                           {val}
                         </span>
                       </div>
@@ -384,8 +346,8 @@ export default function AdvancedAIPanel() {
             </div>
 
             {/* Model status */}
-            <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+            <div className="mt-3">
+              <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-1.5">
                 Model status
               </div>
               {[
@@ -394,17 +356,23 @@ export default function AdvancedAIPanel() {
                 { name: 'Bayesian (threat)',   version: 'vbayesian-v3.1', ok: true  },
                 { name: 'LSTM (anomaly)',       version: 'vlstm-v1.4',    ok: false },
               ].map((m) => (
-                <div key={m.name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 10, padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <div
+                  key={m.name}
+                  className="flex justify-between items-center text-[10px] py-1 border-b border-white/[0.04]"
+                >
                   <div>
-                    <div style={{ color: 'var(--text-primary)' }}>{m.name}</div>
-                    <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{m.version}</div>
+                    <div className="text-text-primary">{m.name}</div>
+                    <div className="text-[10px] text-text-secondary">{m.version}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <span style={{ color: m.ok ? 'var(--sensor-acoustic)' : 'var(--alert-medium)', fontWeight: 700, fontSize: 9 }}>
+                  <div className="flex gap-1.5 items-center">
+                    <span
+                      className="font-bold text-[9px]"
+                      style={{ color: m.ok ? 'var(--sensor-acoustic)' : 'var(--alert-medium)' }}
+                    >
                       {m.ok ? '● OK' : '⚠ DEGRADED'}
                     </span>
                     {!m.ok && (
-                      <button style={{ padding: '2px 6px', background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.4)', borderRadius: 3, color: 'var(--alert-medium)', cursor: 'pointer', fontSize: 9 }}>
+                      <button className="py-[2px] px-1.5 bg-[rgba(249,115,22,0.15)] border border-[rgba(249,115,22,0.4)] rounded-[3px] text-alert-medium cursor-pointer text-[9px]">
                         Recalibrate
                       </button>
                     )}

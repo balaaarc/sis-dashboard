@@ -1,5 +1,5 @@
-import type { ThreatLevel } from '../../types/sensors'
-import { getThreatLevelColor } from '../../utils/formatters'
+import type { ThreatLevel } from '@/types/sensors'
+import { getThreatLevelColor } from '@/utils/formatters'
 
 interface ThreatGaugeProps {
   score: number
@@ -34,7 +34,7 @@ function getArcColor(score: number): string {
   return 'var(--alert-critical)'
 }
 
-export default function ThreatGauge({ score, level }: ThreatGaugeProps) {
+export function ThreatGauge({ score, level }: ThreatGaugeProps) {
   const clampedScore = Math.max(0, Math.min(100, score))
   const endAngle = START_ANGLE + (clampedScore / 100) * ARC_SPAN
   const fullEnd = START_ANGLE + ARC_SPAN
@@ -56,8 +56,8 @@ export default function ThreatGauge({ score, level }: ThreatGaugeProps) {
   const levelColor = getThreatLevelColor(level)
 
   return (
-    <div className="gauge-container" style={{ width: '100%' }}>
-      <svg viewBox="0 0 400 400" style={{ width: '100%', maxWidth: 240, height: 'auto' }}>
+    <div className="gauge-container w-full">
+      <svg viewBox="0 0 400 400" className="w-full max-w-[240px] h-auto">
         {/* Background arc */}
         <path
           d={bgArcPath}

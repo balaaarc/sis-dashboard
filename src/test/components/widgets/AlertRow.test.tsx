@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import AlertRow from '../../../components/widgets/AlertRow'
-import type { Alert } from '../../../types/sensors'
+import { AlertRow } from '@/components/widgets/AlertRow'
+import type { Alert } from '@/types/sensors'
 
 function mockAlert(overrides = {}): Alert {
   return {

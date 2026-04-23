@@ -5,10 +5,10 @@
 // ============================================================
 
 import { useState, useMemo } from 'react'
-import { useSensorStore } from '../../store/sensorStore'
-import { getSensorFamilyColor } from '../../utils/formatters'
-import { useIsMobile } from '../../hooks/useIsMobile'
-import type { SensorFamily, SensorModality } from '../../types/sensors'
+import { useSensorStore } from '@/store/sensorStore'
+import { getSensorFamilyColor } from '@/utils/formatters'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import type { SensorFamily, SensorModality } from '@/types/sensors'
 
 // ── Port / sensor mapping ─────────────────────────────────────────────────────
 
@@ -127,13 +127,6 @@ const NODE_DETAILS: Record<string, { title: string; body: string }> = {
   'E': { title: 'Cluster E — Active alert ⚠', body: 'AI Camera (ETH-01) flagged anomaly event 3m 42s ago. Person-class confidence 94%. ETD sensor (USB-03) co-located — no explosive signature detected. Alert level: AMBER. Track ID: T-0042, velocity 1.2 m/s bearing 042°.' },
 }
 
-// ── Utility ───────────────────────────────────────────────────────────────────
-
-function isLive(sensorId: string, sensors: Map<string, { timestamp: string }>): boolean {
-  const s = sensors.get(sensorId)
-  if (!s) return false
-  return (Date.now() - new Date(s.timestamp).getTime()) < 10_000
-}
 
 // ── Small sub-components ──────────────────────────────────────────────────────
 
@@ -461,7 +454,7 @@ function PortConfigTab({ onEditPort }: { onEditPort: (idx: number) => void }) {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p, i) => {
+              {filtered.map((p) => {
                 const abbr = SENSOR_ABBR[p.sensor] ?? '?'
                 return (
                   <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.12s' }}
@@ -830,12 +823,12 @@ function PeriodicityModal({ portIdx, onClose, onSave }: { portIdx: number; onClo
 
 type TabId = 'overview' | 'ports' | 'dataflow' | 'deployment'
 
-export default function DeviceConfigPage() {
+export function DeviceConfigPage() {
   const [activeTab,    setActiveTab]    = useState<TabId>('overview')
   const [activeUnit,   setActiveUnit]   = useState(0)
   const [selectedPort, setSelectedPort] = useState<string | null>(null)
   const [modalPortIdx, setModalPortIdx] = useState<number | null>(null)
-  const [portPeriods,  setPortPeriods]  = useState<Record<number, string>>({})
+  const [, setPortPeriods]  = useState<Record<number, string>>({})
 
   const sensors  = useSensorStore(s => s.sensors)
   const isMobile = useIsMobile()

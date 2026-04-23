@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { act } from '@testing-library/react'
-import { useSystemStore } from '../../store/systemStore'
-import type { SystemHealth, ScenarioType } from '../../types/sensors'
+import { useSystemStore } from '@/store/systemStore'
+import type { SystemHealth, ScenarioType } from '@/types/sensors'
 
 function mockSystemHealth(overrides?: Partial<SystemHealth>): SystemHealth {
   return {

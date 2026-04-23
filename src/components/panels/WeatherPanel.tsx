@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSettingsStore } from '../../store/settingsStore'
+import { useSettingsStore } from '@/store/settingsStore'
 
 interface WeatherReading {
   temp_c: number
@@ -118,7 +118,7 @@ function WindCompass({ dir, speed }: { dir: string; speed: number }) {
   )
 }
 
-export default function WeatherPanel() {
+export function WeatherPanel() {
   const wx = useLiveWeather()
   const forecast = useForecast()
   const [view, setView] = useState<'current' | 'forecast'>('current')
@@ -134,97 +134,70 @@ export default function WeatherPanel() {
 
   if (!showWeather) {
     return (
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: 12 }}>
+      <div className="flex-1 flex items-center justify-center text-text-secondary text-[12px]">
         Weather widget disabled in Settings
       </div>
     )
   }
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Stats bar */}
-      <div
-        style={{
-          padding: '4px 10px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          flexShrink: 0,
-          fontSize: 10,
-        }}
-      >
-        <span style={{ color: 'var(--text-secondary)' }}>
-          {COND_ICON[wx.condition]} <strong style={{ color: 'var(--text-primary)' }}>{wx.condition}</strong>
+      <div className="py-1 px-[10px] border-b border-border-color bg-bg-secondary flex items-center gap-[10px] shrink-0 text-[10px]">
+        <span className="text-text-secondary">
+          {COND_ICON[wx.condition]} <strong className="text-text-primary">{wx.condition}</strong>
         </span>
-        <span style={{ color: 'var(--text-secondary)' }}>
+        <span className="text-text-secondary">
           👁 {wx.visibility_km} km
         </span>
         {lowVisHours > 0 && (
-          <span style={{ color: 'var(--alert-medium)', fontWeight: 700 }}>⚠ {lowVisHours}h low vis forecast</span>
+          <span className="text-alert-medium font-bold">⚠ {lowVisHours}h low vis forecast</span>
         )}
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-secondary)' }}>
+        <span className="ml-auto text-text-secondary">
           MOSDAC / IMD
         </span>
       </div>
 
       {/* View toggle */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+      <div className="flex border-b border-border-color shrink-0">
         {(['current', 'forecast'] as const).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
-            style={{
-              flex: 1,
-              padding: '6px',
-              border: 'none',
-              borderBottom: view === v ? '2px solid var(--accent-blue)' : '2px solid transparent',
-              background: 'transparent',
-              color: view === v ? 'var(--accent-blue)' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: 10,
-              fontWeight: view === v ? 700 : 400,
-            }}
+            className={[
+              'flex-1 py-1.5 px-1.5 border-none bg-transparent cursor-pointer text-[10px]',
+              view === v
+                ? 'border-b-2 border-accent-blue text-accent-blue font-bold'
+                : 'border-b-2 border-transparent text-text-secondary font-normal',
+            ].join(' ')}
           >
             {v === 'current' ? '🌡 Current' : '📅 24h Forecast'}
           </button>
         ))}
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto">
 
         {view === 'current' && (
-          <div style={{ padding: 10 }}>
+          <div className="p-[10px]">
             {/* Main reading */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 8,
-                padding: '12px 14px',
-                marginBottom: 10,
-              }}
-            >
-              <div style={{ fontSize: 36 }}>{COND_ICON[wx.condition]}</div>
+            <div className="flex items-center gap-3 bg-bg-secondary border border-border-color rounded-lg px-[14px] py-3 mb-[10px]">
+              <div className="text-[36px]">{COND_ICON[wx.condition]}</div>
               <div>
-                <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'monospace', color: 'var(--text-primary)', lineHeight: 1 }}>
+                <div className="text-[28px] font-bold font-mono text-text-primary leading-none">
                   {wx.temp_c}°C
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{wx.condition}</div>
-                <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>Dew point: {wx.dewpoint_c}°C</div>
+                <div className="text-[11px] text-text-secondary">{wx.condition}</div>
+                <div className="text-[10px] text-text-secondary">Dew point: {wx.dewpoint_c}°C</div>
               </div>
-              <div style={{ marginLeft: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <div className="ml-auto flex flex-col items-center gap-[2px]">
                 <WindCompass dir={wx.wind_dir} speed={wx.wind_kmh} />
-                <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{wx.wind_dir} {wx.wind_kmh} km/h</span>
+                <span className="text-[10px] text-text-secondary">{wx.wind_dir} {wx.wind_kmh} km/h</span>
               </div>
             </div>
 
             {/* Metrics grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 10 }}>
+            <div className="grid grid-cols-2 gap-1.5 mb-[10px]">
               {[
                 { icon: '💧', label: 'Humidity',    value: `${wx.humidity_pct}%`,    color: wx.humidity_pct > 90 ? 'var(--alert-medium)' : 'var(--text-primary)' },
                 { icon: '👁',  label: 'Visibility',  value: `${wx.visibility_km} km`,  color: wx.visibility_km < 2 ? 'var(--alert-critical)' : wx.visibility_km < 5 ? 'var(--alert-medium)' : 'var(--text-primary)' },
@@ -233,20 +206,12 @@ export default function WeatherPanel() {
               ].map((m) => (
                 <div
                   key={m.label}
-                  style={{
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 6,
-                    padding: '8px 10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                  }}
+                  className="bg-bg-secondary border border-border-color rounded-[6px] px-[10px] py-2 flex items-center gap-2"
                 >
-                  <span style={{ fontSize: 16 }}>{m.icon}</span>
+                  <span className="text-[16px]">{m.icon}</span>
                   <div>
-                    <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{m.label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'monospace', color: m.color }}>
+                    <div className="text-[10px] text-text-secondary">{m.label}</div>
+                    <div className="text-[13px] font-bold font-mono" style={{ color: m.color }}>
                       {m.value}
                     </div>
                   </div>
@@ -256,56 +221,49 @@ export default function WeatherPanel() {
 
             {/* Sensor recommendation */}
             <div
-              style={{
-                background: recBg,
-                border: `1px solid ${recBorder}`,
-                borderRadius: 6,
-                padding: '8px 10px',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 8,
-                fontSize: 10,
-              }}
+              className="rounded-[6px] px-[10px] py-2 flex items-start gap-2 text-[10px]"
+              style={{ background: recBg, border: `1px solid ${recBorder}` }}
             >
-              <span style={{ fontSize: 16, flexShrink: 0 }}>{rec.icon}</span>
+              <span className="text-[16px] shrink-0">{rec.icon}</span>
               <div>
-                <div style={{ fontWeight: 700, color: recColor, marginBottom: 2 }}>Sensor Recommendation</div>
-                <div style={{ color: 'var(--text-secondary)' }}>{rec.text}</div>
+                <div className="font-bold mb-[2px]" style={{ color: recColor }}>Sensor Recommendation</div>
+                <div className="text-text-secondary">{rec.text}</div>
               </div>
             </div>
           </div>
         )}
 
         {view === 'forecast' && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               24-hour hourly forecast
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <div className="flex flex-col gap-[3px]">
               {forecast.map((f) => {
                 const visCritical = f.visibility_km < 2
                 return (
                   <div
                     key={f.hour}
+                    className="flex items-center gap-2 py-[5px] px-2 rounded text-[10px]"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '5px 8px',
                       background: visCritical ? 'rgba(249,115,22,0.06)' : 'var(--bg-secondary)',
                       border: `1px solid ${visCritical ? 'rgba(249,115,22,0.2)' : 'var(--border-color)'}`,
-                      borderRadius: 4,
-                      fontSize: 10,
                     }}
                   >
-                    <span style={{ width: 44, color: 'var(--text-secondary)', flexShrink: 0, fontFamily: 'monospace', fontSize: 9 }}>{f.hour}</span>
-                    <span style={{ width: 16, flexShrink: 0 }}>{COND_ICON[f.condition]}</span>
-                    <span style={{ width: 40, fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-primary)', flexShrink: 0 }}>{f.temp_c}°C</span>
-                    <span style={{ flex: 1, color: 'var(--text-secondary)', fontSize: 9 }}>{f.condition}</span>
-                    <span style={{ color: visCritical ? 'var(--alert-medium)' : 'var(--text-secondary)', fontFamily: 'monospace', fontSize: 10, flexShrink: 0 }}>
+                    <span className="w-11 text-text-secondary shrink-0 font-mono text-[9px]">{f.hour}</span>
+                    <span className="w-4 shrink-0">{COND_ICON[f.condition]}</span>
+                    <span className="w-10 font-mono font-bold text-text-primary shrink-0">{f.temp_c}°C</span>
+                    <span className="flex-1 text-text-secondary text-[9px]">{f.condition}</span>
+                    <span
+                      className="font-mono text-[10px] shrink-0"
+                      style={{ color: visCritical ? 'var(--alert-medium)' : 'var(--text-secondary)' }}
+                    >
                       👁{f.visibility_km}km
                     </span>
-                    <span style={{ color: f.rain_pct > 40 ? 'var(--accent-blue)' : 'var(--text-secondary)', fontFamily: 'monospace', fontSize: 10, flexShrink: 0 }}>
+                    <span
+                      className="font-mono text-[10px] shrink-0"
+                      style={{ color: f.rain_pct > 40 ? 'var(--accent-blue)' : 'var(--text-secondary)' }}
+                    >
                       💧{f.rain_pct}%
                     </span>
                   </div>

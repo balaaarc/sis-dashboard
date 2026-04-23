@@ -1,8 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react'
-import { useSensorStore } from '../store/sensorStore'
-import { useAlertStore } from '../store/alertStore'
-import { useSystemStore } from '../store/systemStore'
-import type { Alert, SensorPayload, Track, ThreatAssessment, SystemHealth, ScenarioType } from '../types/sensors'
+import { useSensorStore } from '@/store/sensorStore'
+import { useAlertStore } from '@/store/alertStore'
+import { useSystemStore } from '@/store/systemStore'
+import type { Alert, SensorPayload, Track, ThreatAssessment, SystemHealth, ScenarioType } from '@/types/sensors'
 
 const WS_URL = import.meta.env.VITE_WS_URL ?? 'wss://sis-sse.onrender.com'
 const BACKOFF_DELAYS = [1000, 2000, 4000, 8000, 16000]
@@ -131,7 +131,6 @@ export function useWebSocket() {
     if (!mountedRef.current) return
     const attempt = reconnectAttemptRef.current
     if (attempt >= BACKOFF_DELAYS.length) {
-      console.warn('[WS] Max reconnect attempts reached. Manual reconnect required.')
       useSystemStore.getState().setConnectionStatus('disconnected')
       return
     }

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import VideoPanel from '../../../components/panels/VideoPanel'
-import { useSensorStore } from '../../../store/sensorStore'
-import type { SensorPayload } from '../../../types/sensors'
+import { VideoPanel } from '@/components/panels/VideoPanel'
+import { useSensorStore } from '@/store/sensorStore'
+import type { SensorPayload } from '@/types/sensors'
 
 // Mock fetch for PTZ control commands
 global.fetch = vi.fn().mockResolvedValue({ ok: true })

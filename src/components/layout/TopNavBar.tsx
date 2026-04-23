@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useAlertStore } from '../../store/alertStore'
-import { useSystemStore } from '../../store/systemStore'
-import ConnectionBadge from '../widgets/ConnectionBadge'
-import ThemeToggle from '../widgets/ThemeToggle'
-import ScenarioSelector from '../widgets/ScenarioSelector'
+import { useAlertStore } from '@/store/alertStore'
+import { useSystemStore } from '@/store/systemStore'
+import { ConnectionBadge } from '@/components/widgets/ConnectionBadge'
+import { ThemeToggle } from '@/components/widgets/ThemeToggle'
+import { ScenarioSelector } from '@/components/widgets/ScenarioSelector'
 
 const SITES = ['BOP-ALPHA-01', 'BOP-BETA-01']
 
@@ -14,7 +14,7 @@ function formatUTCTime(d: Date): string {
   return `${hh}:${mm}:${ss} UTC`
 }
 
-export default function TopNavBar() {
+export function TopNavBar() {
   const [time, setTime] = useState(() => formatUTCTime(new Date()))
   const [site, setSite] = useState(SITES[0])
   const alerts = useAlertStore((s) => s.alerts)
@@ -31,132 +31,78 @@ export default function TopNavBar() {
 
   return (
     <header
+      className="flex items-center px-[14px] gap-2 shrink-0 z-[100]"
       style={{
         height: 'var(--topbar-height, 52px)',
         background: 'var(--panel-header-bg)',
         borderBottom: '1px solid var(--panel-border)',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 14px',
-        gap: 8,
-        flexShrink: 0,
-        zIndex: 100,
         boxShadow: '0 1px 12px rgba(0,0,0,0.3)',
       }}
     >
       {/* Hamburger — mobile only */}
       <button
-        className="topbar-hamburger"
+        className="topbar-hamburger w-[34px] h-[34px] rounded-[6px] border border-border-color text-text-secondary cursor-pointer flex items-center justify-center text-[15px] shrink-0 transition-all duration-150"
         onClick={toggleMobileSidebar}
         aria-label={mobileSidebarOpen ? 'Close menu' : 'Open menu'}
-        style={{
-          width: 34,
-          height: 34,
-          borderRadius: 6,
-          border: '1px solid var(--border-color)',
-          background: mobileSidebarOpen ? 'var(--bg-tertiary)' : 'transparent',
-          color: 'var(--text-secondary)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 15,
-          flexShrink: 0,
-          transition: 'all 0.15s',
-        }}
+        style={{ background: mobileSidebarOpen ? 'var(--bg-tertiary)' : 'transparent' }}
       >
         {mobileSidebarOpen ? '✕' : '☰'}
       </button>
 
       {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexShrink: 0 }}>
-        <span style={{ fontSize: 17, fontWeight: 900, color: 'var(--accent-blue)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+      <div className="flex items-baseline gap-1.5 shrink-0">
+        <span className="text-[17px] font-black text-accent-blue tracking-[-0.02em] leading-none">
           SIS
         </span>
-        <span style={{ fontSize: 9, color: 'var(--text-muted)', letterSpacing: '0.14em', fontWeight: 700, textTransform: 'uppercase' }}>
+        <span className="text-[9px] text-text-muted tracking-[0.14em] font-bold uppercase">
           IINVSYS
         </span>
       </div>
 
       {/* Divider */}
-      <div style={{ width: 1, height: 24, background: 'var(--border-color)', flexShrink: 0 }} />
+      <div className="w-px h-6 bg-border-color shrink-0" />
 
       {/* Site selector — hidden on mobile */}
-      <div className="topbar-site" style={{ display: 'contents' }}>
-        <div style={{ position: 'relative', flexShrink: 0 }}>
+      <div className="topbar-site contents">
+        <div className="relative shrink-0">
           <select
             value={site}
             onChange={(e) => setSite(e.target.value)}
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              padding: '0 24px 0 10px',
-              height: 30,
-              borderRadius: 6,
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-tertiary)',
-              color: 'var(--text-primary)',
-              cursor: 'pointer',
-              appearance: 'none',
-              WebkitAppearance: 'none',
-              outline: 'none',
-            }}
+            className="text-[12px] font-semibold pl-[10px] pr-6 h-[30px] rounded-[6px] border border-border-color bg-bg-tertiary text-text-primary cursor-pointer appearance-none outline-none"
           >
             {SITES.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
-          <span style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-secondary)', fontSize: 9 }}>▾</span>
+          <span className="absolute right-[7px] top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary text-[9px]">▾</span>
         </div>
       </div>
 
       {/* Scenario selector — hidden on tablet/mobile */}
-      <div className="topbar-scenario" style={{ display: 'contents' }}>
+      <div className="topbar-scenario contents">
         <ScenarioSelector />
       </div>
 
       {/* Spacer */}
-      <div style={{ flex: 1 }} />
+      <div className="flex-1" />
 
       {/* UTC Clock — hidden on mobile */}
       <div
-        className="topbar-clock"
-        style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 12,
-          color: 'var(--text-secondary)',
-          letterSpacing: '0.05em',
-          flexShrink: 0,
-          padding: '4px 8px',
-          background: 'var(--bg-tertiary)',
-          borderRadius: 5,
-          border: '1px solid var(--border-subtle)',
-        }}
+        className="topbar-clock font-mono text-[12px] text-text-secondary tracking-[0.05em] shrink-0 py-1 px-2 bg-bg-tertiary rounded-[5px] border border-border-subtle"
       >
         {time}
       </div>
 
       {/* Connection Badge */}
-      <div className="topbar-connection-badge" style={{ display: 'contents' }}>
+      <div className="topbar-connection-badge contents">
         <ConnectionBadge />
       </div>
 
       {/* Unacked alert count */}
       {unackedCount > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            padding: '3px 8px 3px 7px',
-            borderRadius: 99,
-            background: 'rgba(239,68,68,0.15)',
-            border: '1px solid rgba(239,68,68,0.3)',
-            flexShrink: 0,
-          }}
-        >
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--alert-critical)', boxShadow: '0 0 5px var(--alert-critical)', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--alert-critical)', fontFamily: 'monospace' }}>
+        <div className="flex items-center gap-[5px] py-[3px] pr-2 pl-[7px] rounded-full bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.3)] shrink-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-alert-critical shrink-0" style={{ boxShadow: '0 0 5px var(--alert-critical)' }} />
+          <span className="text-[11px] font-bold text-alert-critical font-mono">
             {unackedCount > 99 ? '99+' : unackedCount}
           </span>
         </div>
@@ -166,32 +112,12 @@ export default function TopNavBar() {
       <ThemeToggle />
 
       {/* User badge */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '4px 10px',
-          borderRadius: 6,
-          background: 'var(--bg-tertiary)',
-          border: '1px solid var(--border-color)',
-          flexShrink: 0,
-        }}
-      >
+      <div className="flex items-center gap-1.5 py-1 px-[10px] rounded-[6px] bg-bg-tertiary border border-border-color shrink-0">
         <span
-          style={{
-            width: 7,
-            height: 7,
-            borderRadius: '50%',
-            background: 'var(--sensor-acoustic)',
-            boxShadow: '0 0 5px var(--sensor-acoustic)',
-            flexShrink: 0,
-          }}
+          className="w-[7px] h-[7px] rounded-full bg-sensor-acoustic shrink-0"
+          style={{ boxShadow: '0 0 5px var(--sensor-acoustic)' }}
         />
-        <span
-          className="topbar-user-label"
-          style={{ fontSize: 11, color: 'var(--text-primary)', fontWeight: 600 }}
-        >
+        <span className="topbar-user-label text-[11px] text-text-primary font-semibold">
           Operator
         </span>
       </div>

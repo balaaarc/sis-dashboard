@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import WaveformChart from '../../../components/widgets/WaveformChart'
+import { WaveformChart } from '@/components/widgets/WaveformChart'
 
 function makeData(length: number): number[] {
   return Array.from({ length }, (_, i) => Math.sin(i * 0.1) * 50)

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { act } from '@testing-library/react'
-import { useAlertStore } from '../../store/alertStore'
-import type { Alert, ThreatAssessment } from '../../types/sensors'
+import { useAlertStore } from '@/store/alertStore'
+import type { Alert, ThreatAssessment } from '@/types/sensors'
 
 function mockAlert(overrides?: Partial<Alert>): Alert {
   return {

@@ -1,12 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import PanelShell from '../../../components/layout/PanelShell'
+import { PanelShell } from '@/components/layout/PanelShell'
+import { useViewStore } from '@/store/viewStore'
 
 describe('PanelShell', () => {
+  beforeEach(() => {
+    // Reset view store so panel state doesn't leak between tests
+    useViewStore.setState({ panelViews: {}, expandedPanel: null })
+  })
   it('renders without crashing with title and children', () => {
     const { container } = render(
-      <PanelShell title="Test Panel">
+      <PanelShell panelId="test" title="Test Panel">
         <div>Child content</div>
       </PanelShell>
     )
@@ -15,7 +20,7 @@ describe('PanelShell', () => {
 
   it('shows the title text', () => {
     render(
-      <PanelShell title="My Panel Title">
+      <PanelShell panelId="test" title="My Panel Title">
         <div>content</div>
       </PanelShell>
     )
@@ -24,7 +29,7 @@ describe('PanelShell', () => {
 
   it('shows the icon when provided', () => {
     render(
-      <PanelShell title="Panel" icon="🔔">
+      <PanelShell panelId="test" title="Panel" icon="🔔">
         <div>content</div>
       </PanelShell>
     )
@@ -33,7 +38,7 @@ describe('PanelShell', () => {
 
   it('renders children inside the panel body', () => {
     render(
-      <PanelShell title="Panel">
+      <PanelShell panelId="test" title="Panel">
         <div data-testid="child-node">child here</div>
       </PanelShell>
     )
@@ -43,7 +48,7 @@ describe('PanelShell', () => {
 
   it('has a minimize button', () => {
     render(
-      <PanelShell title="Panel">
+      <PanelShell panelId="test" title="Panel">
         <div>content</div>
       </PanelShell>
     )
@@ -53,7 +58,7 @@ describe('PanelShell', () => {
 
   it('clicking minimize hides the children (minimized state)', () => {
     render(
-      <PanelShell title="Panel">
+      <PanelShell panelId="test" title="Panel">
         <div data-testid="body-content">visible content</div>
       </PanelShell>
     )
@@ -66,7 +71,7 @@ describe('PanelShell', () => {
 
   it('clicking minimize again shows children again (toggle behavior)', () => {
     render(
-      <PanelShell title="Panel">
+      <PanelShell panelId="test" title="Panel">
         <div data-testid="body-content">visible content</div>
       </PanelShell>
     )
@@ -82,7 +87,7 @@ describe('PanelShell', () => {
 
   it('applies gridArea style when gridArea prop is provided', () => {
     const { container } = render(
-      <PanelShell title="Panel" gridArea="main">
+      <PanelShell panelId="test" title="Panel" gridArea="main">
         <div>content</div>
       </PanelShell>
     )
@@ -93,7 +98,7 @@ describe('PanelShell', () => {
   it('does not crash without optional props (no icon, no gridArea)', () => {
     expect(() =>
       render(
-        <PanelShell title="Minimal">
+        <PanelShell panelId="test" title="Minimal">
           <span>ok</span>
         </PanelShell>
       )
@@ -104,6 +109,7 @@ describe('PanelShell', () => {
   it('headerExtra content is rendered when provided', () => {
     render(
       <PanelShell
+        panelId="test"
         title="Panel"
         headerExtra={<button data-testid="extra-btn">Extra</button>}
       >

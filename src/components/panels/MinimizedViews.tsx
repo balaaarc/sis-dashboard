@@ -5,22 +5,22 @@
  * Each component reads only the minimum state needed to render key metrics.
  */
 import { useState, useEffect } from 'react'
-import { useSensorStore } from '../../store/sensorStore'
-import { useAlertStore }  from '../../store/alertStore'
-import { useSystemStore } from '../../store/systemStore'
+import { useSensorStore } from '@/store/sensorStore'
+import { useAlertStore }  from '@/store/alertStore'
+import { useSystemStore } from '@/store/systemStore'
 
 // ── shared style helpers ─────────────────────────────────────────────────────
 const Kpi = ({ label, value, color }: { label?: string; value: string; color?: string }) => (
-  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap' }}>
-    {label && <span style={{ color: 'var(--text-secondary)', fontSize: 10 }}>{label}</span>}
-    <strong style={{ color: color ?? 'var(--text-primary)', fontSize: 11, fontFamily: 'monospace' }}>
+  <span className="inline-flex items-center gap-[3px] whitespace-nowrap">
+    {label && <span className="text-text-secondary text-[10px]">{label}</span>}
+    <strong className="text-[11px] font-mono" style={{ color: color ?? 'var(--text-primary)' }}>
       {value}
     </strong>
   </span>
 )
 
 const Sep = () => (
-  <span style={{ color: 'var(--border-color)', userSelect: 'none' }}>·</span>
+  <span className="text-border-color select-none">·</span>
 )
 
 // ── LiveMap ──────────────────────────────────────────────────────────────────
@@ -86,9 +86,9 @@ function AimlMini() {
       {ta && (
         <>
           <Sep />
-          <Kpi label="Threat" value={ta.overall_threat_level} color={
-            ta.overall_threat_level === 'CRITICAL' ? 'var(--alert-critical)' :
-            ta.overall_threat_level === 'HIGH' ? 'var(--alert-high)' : 'var(--sensor-acoustic)'
+          <Kpi label="Threat" value={ta.threat_level} color={
+            ta.threat_level === 'CRITICAL' ? 'var(--alert-critical)' :
+            ta.threat_level === 'HIGH' ? 'var(--alert-high)' : 'var(--sensor-acoustic)'
           } />
         </>
       )}
@@ -316,7 +316,7 @@ const MINI_MAP: Record<string, () => JSX.Element> = {
   weather:    WeatherMini,
 }
 
-export default function PanelMiniView({ panelId }: { panelId: string }) {
+export function PanelMiniView({ panelId }: { panelId: string }) {
   const Comp = MINI_MAP[panelId]
   if (!Comp) return null
   return <Comp />

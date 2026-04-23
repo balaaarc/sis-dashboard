@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import ThemeToggle from '../../../components/widgets/ThemeToggle'
-import { useSystemStore } from '../../../store/systemStore'
+import { ThemeToggle } from '@/components/widgets/ThemeToggle'
+import { useSystemStore } from '@/store/systemStore'
 
 const defaultSystemState = {
   theme: 'dark' as const,

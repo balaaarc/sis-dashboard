@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SystemHealthPanel from '../../../components/panels/SystemHealthPanel'
-import { useSystemStore } from '../../../store/systemStore'
-import type { SystemHealth } from '../../../types/sensors'
+import { SystemHealthPanel } from '@/components/panels/SystemHealthPanel'
+import { useSystemStore } from '@/store/systemStore'
+import type { SystemHealth } from '@/types/sensors'
 
 const mockHealth: SystemHealth = {
   timestamp: '2026-04-11T10:00:00.000Z',

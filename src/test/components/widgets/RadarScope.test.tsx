@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import RadarScope from '../../../components/widgets/RadarScope'
-import type { Track } from '../../../types/sensors'
+import { RadarScope } from '@/components/widgets/RadarScope'
+import type { Track } from '@/types/sensors'
 
 function mockTrack(overrides: Partial<Track> = {}): Track {
   return {

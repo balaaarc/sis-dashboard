@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useSettingsStore } from '../../store/settingsStore'
-import { useSystemStore } from '../../store/systemStore'
-import { useViewStore } from '../../store/viewStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { useSystemStore } from '@/store/systemStore'
+import { useViewStore } from '@/store/viewStore'
 
 const CATEGORY_ICONS: Record<string, string> = {
   'Video & Imaging':            '📹',
@@ -29,36 +29,18 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
   return (
     <button
       onClick={onChange}
-      style={{
-        width: 36,
-        height: 20,
-        borderRadius: 10,
-        border: 'none',
-        background: checked ? 'var(--accent-blue)' : 'var(--bg-tertiary)',
-        cursor: 'pointer',
-        position: 'relative',
-        flexShrink: 0,
-        transition: 'background 0.2s',
-      }}
+      className="w-9 h-5 rounded-[10px] border-none cursor-pointer relative shrink-0 transition-colors duration-200"
+      style={{ background: checked ? 'var(--accent-blue)' : 'var(--bg-tertiary)' }}
     >
       <span
-        style={{
-          position: 'absolute',
-          top: 2,
-          left: checked ? 18 : 2,
-          width: 16,
-          height: 16,
-          borderRadius: '50%',
-          background: '#fff',
-          transition: 'left 0.2s',
-          display: 'block',
-        }}
+        className="absolute top-[2px] w-4 h-4 rounded-full bg-white transition-[left] duration-200 block"
+        style={{ left: checked ? 18 : 2 }}
       />
     </button>
   )
 }
 
-export default function SettingsPanel() {
+export function SettingsPanel() {
   const [activeTab, setActiveTab] = useState<Tab>('widgets')
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
@@ -101,38 +83,25 @@ export default function SettingsPanel() {
     weather:    { label: 'Weather & Terrain',         icon: '🌤',  isNew: true },
   }
 
+  const newBadgeCls = 'text-[10px] font-bold bg-[rgba(34,197,94,0.15)] text-sensor-acoustic border border-[rgba(34,197,94,0.3)] rounded px-1 tracking-[0.05em]'
+  const ctrlBtnBase = 'py-[3px] px-2 bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]'
+
   const categories = Object.keys(widgetsByCategory)
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Tab bar */}
-      <div
-        style={{
-          display: 'flex',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          flexShrink: 0,
-        }}
-      >
+      <div className="flex border-b border-border-color bg-bg-secondary shrink-0">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            style={{
-              flex: 1,
-              padding: '10px 4px',
-              border: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid var(--accent-blue)' : '2px solid transparent',
-              background: 'transparent',
-              color: activeTab === tab.id ? 'var(--accent-blue)' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: 11,
-              fontWeight: activeTab === tab.id ? 700 : 400,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4,
-            }}
+            className={[
+              'flex-1 py-[10px] px-1 border-none bg-transparent cursor-pointer text-[11px] flex items-center justify-center gap-1',
+              activeTab === tab.id
+                ? 'border-b-2 border-accent-blue text-accent-blue font-bold'
+                : 'border-b-2 border-transparent text-text-secondary font-normal',
+            ].join(' ')}
           >
             <span>{tab.icon}</span>
             {tab.label}
@@ -141,12 +110,12 @@ export default function SettingsPanel() {
       </div>
 
       {/* Tab content */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 16 }}>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
 
         {/* ── WIDGETS TAB ── */}
         {activeTab === 'widgets' && (
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+            <div className="text-[11px] text-text-secondary mb-4 leading-relaxed">
               Toggle individual widgets on or off. Changes take effect immediately. Disabled widgets stop rendering but retain their data connections.
             </div>
 
@@ -156,100 +125,51 @@ export default function SettingsPanel() {
               const isExpanded = expandedCategory === cat
               const allVisible = widgets.every((w) => w.visible)
               const someVisible = widgets.some((w) => w.visible)
+              const statusDot = allVisible
+                ? 'var(--sensor-acoustic)'
+                : someVisible
+                ? 'var(--alert-medium)'
+                : 'var(--alert-critical)'
 
               return (
-                <div key={cat} style={{ marginBottom: 8 }}>
+                <div key={cat} className="mb-2">
                   {/* Category header */}
                   <button
                     onClick={() => setExpandedCategory(isExpanded ? null : cat)}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      padding: '8px 10px',
-                      background: 'var(--bg-secondary)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: isExpanded ? '6px 6px 0 0' : 6,
-                      cursor: 'pointer',
-                      color: 'var(--text-primary)',
-                      fontSize: 12,
-                      fontWeight: 600,
-                    }}
+                    className={[
+                      'w-full flex items-center gap-2 py-2 px-[10px] bg-bg-secondary border border-border-color cursor-pointer text-text-primary text-[12px] font-semibold',
+                      isExpanded ? 'rounded-t-[6px]' : 'rounded-[6px]',
+                    ].join(' ')}
                   >
                     <span>{icon}</span>
-                    <span style={{ flex: 1, textAlign: 'left' }}>{cat}</span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        color: 'var(--text-secondary)',
-                        background: 'var(--bg-tertiary)',
-                        borderRadius: 10,
-                        padding: '1px 6px',
-                      }}
-                    >
+                    <span className="flex-1 text-left">{cat}</span>
+                    <span className="text-[10px] text-text-secondary bg-bg-tertiary rounded-[10px] py-[1px] px-1.5">
                       {widgets.filter((w) => w.visible).length}/{widgets.length}
                     </span>
                     <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: allVisible
-                          ? 'var(--sensor-acoustic)'
-                          : someVisible
-                          ? 'var(--alert-medium)'
-                          : 'var(--alert-critical)',
-                        flexShrink: 0,
-                      }}
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ background: statusDot }}
                     />
-                    <span style={{ color: 'var(--text-secondary)', fontSize: 10 }}>
+                    <span className="text-text-secondary text-[10px]">
                       {isExpanded ? '▲' : '▼'}
                     </span>
                   </button>
 
                   {/* Widget rows */}
                   {isExpanded && (
-                    <div
-                      style={{
-                        border: '1px solid var(--border-color)',
-                        borderTop: 'none',
-                        borderRadius: '0 0 6px 6px',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <div className="border border-border-color border-t-0 rounded-b-[6px] overflow-hidden">
                       {widgets.map((widget, i) => (
                         <div
                           key={widget.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            padding: '8px 12px',
-                            borderTop: i > 0 ? '1px solid var(--border-color)' : 'none',
-                            background: 'var(--panel-bg)',
-                          }}
+                          className={`flex items-center gap-[10px] py-2 px-3 bg-panel-bg${i > 0 ? ' border-t border-border-color' : ''}`}
                         >
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1.5 text-[12px]">
                               <span style={{ color: widget.visible ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                                 {widget.label}
                               </span>
                               {widget.isNew && (
-                                <span
-                                  style={{
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    background: 'rgba(34,197,94,0.15)',
-                                    color: 'var(--sensor-acoustic)',
-                                    border: '1px solid rgba(34,197,94,0.3)',
-                                    borderRadius: 4,
-                                    padding: '0 4px',
-                                    letterSpacing: '0.05em',
-                                  }}
-                                >
-                                  NEW
-                                </span>
+                                <span className={newBadgeCls}>NEW</span>
                               )}
                             </div>
                           </div>
@@ -267,44 +187,27 @@ export default function SettingsPanel() {
         {/* ── PANELS TAB ── */}
         {activeTab === 'panels' && (
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+            <div className="text-[11px] text-text-secondary mb-4 leading-relaxed">
               Show or hide entire panel sections from the dashboard grid. Hidden panels are removed from the layout to reclaim screen space.
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="flex flex-col gap-1.5">
               {Object.entries(PANEL_LABELS).map(([id, meta]) => (
                 <div
                   key={id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '10px 14px',
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 6,
-                  }}
+                  className="flex items-center gap-[10px] py-[10px] px-[14px] bg-bg-secondary border border-border-color rounded-[6px]"
                 >
-                  <span style={{ fontSize: 16 }}>{meta.icon}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: panels[id] ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                  <span className="text-[16px]">{meta.icon}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="text-[12px] font-semibold"
+                        style={{ color: panels[id] ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+                      >
                         {meta.label}
                       </span>
                       {meta.isNew && (
-                        <span
-                          style={{
-                            fontSize: 10,
-                            fontWeight: 700,
-                            background: 'rgba(34,197,94,0.15)',
-                            color: 'var(--sensor-acoustic)',
-                            border: '1px solid rgba(34,197,94,0.3)',
-                            borderRadius: 4,
-                            padding: '0 4px',
-                          }}
-                        >
-                          NEW
-                        </span>
+                        <span className={newBadgeCls}>NEW</span>
                       )}
                     </div>
                   </div>
@@ -317,24 +220,17 @@ export default function SettingsPanel() {
 
         {/* ── DISPLAY TAB ── */}
         {activeTab === 'display' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 8,
-                padding: 16,
-              }}
-            >
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>
+          <div className="flex flex-col gap-4">
+            <div className="bg-bg-secondary border border-border-color rounded-lg p-4">
+              <div className="text-[12px] font-bold mb-3 text-text-primary">
                 Theme
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className="flex items-center justify-between">
                 <div>
-                  <div style={{ fontSize: 12 }}>
+                  <div className="text-[12px]">
                     {theme === 'dark' ? '🌙 Dark Mode' : '☀ Light Mode'}
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+                  <div className="text-[11px] text-text-secondary mt-[2px]">
                     Switch between dark tactical view and light operational view
                   </div>
                 </div>
@@ -342,52 +238,37 @@ export default function SettingsPanel() {
               </div>
             </div>
 
-            <div
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 8,
-                padding: 16,
-              }}
-            >
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>
+            <div className="bg-bg-secondary border border-border-color rounded-lg p-4">
+              <div className="text-[12px] font-bold mb-3 text-text-primary">
                 Widget Catalogue Info
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--border-color)' }}>
-                  <span>Total widgets</span><strong style={{ color: 'var(--text-primary)' }}>37</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--border-color)' }}>
-                  <span>Original catalogue</span><strong style={{ color: 'var(--text-primary)' }}>20</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--border-color)' }}>
-                  <span>New additions</span>
-                  <strong style={{ color: 'var(--sensor-acoustic)' }}>17</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid var(--border-color)' }}>
-                  <span>Categories</span><strong style={{ color: 'var(--text-primary)' }}>17</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                  <span>Catalogue version</span><strong style={{ color: 'var(--text-primary)' }}>Section 9.3 (Updated)</strong>
-                </div>
+              <div className="text-[11px] text-text-secondary leading-[1.7]">
+                {[
+                  { label: 'Total widgets',     value: '37',              color: 'var(--text-primary)' },
+                  { label: 'Original catalogue',value: '20',              color: 'var(--text-primary)' },
+                  { label: 'New additions',      value: '17',              color: 'var(--sensor-acoustic)' },
+                  { label: 'Categories',         value: '17',              color: 'var(--text-primary)' },
+                  { label: 'Catalogue version',  value: 'Section 9.3 (Updated)', color: 'var(--text-primary)' },
+                ].map((row, i, arr) => (
+                  <div
+                    key={row.label}
+                    className={`flex justify-between py-1${i < arr.length - 1 ? ' border-b border-border-color' : ''}`}
+                  >
+                    <span>{row.label}</span>
+                    <strong style={{ color: row.color }}>{row.value}</strong>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 8,
-                padding: 16,
-              }}
-            >
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: 'var(--text-primary)' }}>
+            <div className="bg-bg-secondary border border-border-color rounded-lg p-4">
+              <div className="text-[12px] font-bold mb-1 text-text-primary">
                 New Widget Categories
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+              <div className="text-[11px] text-text-secondary leading-[1.7]">
                 {['Counter-UAS', 'Subsurface Detection', 'Communications & Personnel', 'Vehicle & Power Management', 'Command & Reporting', 'Advanced AI Monitoring', 'Weather & Terrain', 'Interoperability'].map((cat) => (
-                  <div key={cat} style={{ display: 'flex', gap: 6, alignItems: 'center', padding: '2px 0' }}>
-                    <span style={{ color: 'var(--sensor-acoustic)', fontSize: 10 }}>✓</span>
+                  <div key={cat} className="flex gap-1.5 items-center py-[2px]">
+                    <span className="text-sensor-acoustic text-[10px]">✓</span>
                     <span>{cat}</span>
                   </div>
                 ))}
@@ -398,22 +279,22 @@ export default function SettingsPanel() {
 
         {/* ── LAYOUT TAB ── */}
         {activeTab === 'layout' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+          <div className="flex flex-col gap-4">
+            <div className="text-[11px] text-text-secondary leading-relaxed">
               Configure how panels are displayed. Each panel supports three view modes:
-              <ul style={{ marginTop: 8, paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <li><strong style={{ color: 'var(--text-primary)' }}>Normal</strong> — default, shows full panel content</li>
-                <li><strong style={{ color: 'var(--text-primary)' }}>Minimized ▬</strong> — compact strip showing only priority data</li>
-                <li><strong style={{ color: 'var(--text-primary)' }}>Expanded ⤢</strong> — panel fills entire view, others collapse to strip</li>
+              <ul className="mt-2 pl-4 flex flex-col gap-1">
+                <li><strong className="text-text-primary">Normal</strong> — default, shows full panel content</li>
+                <li><strong className="text-text-primary">Minimized ▬</strong> — compact strip showing only priority data</li>
+                <li><strong className="text-text-primary">Expanded ⤢</strong> — panel fills entire view, others collapse to strip</li>
               </ul>
             </div>
 
             {/* Default expanded panel */}
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: 'var(--text-primary)' }}>
+            <div className="bg-bg-secondary border border-border-color rounded-lg p-4">
+              <div className="text-[12px] font-bold mb-1 text-text-primary">
                 Default Expanded Panel
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+              <div className="text-[11px] text-text-secondary mb-3 leading-relaxed">
                 This panel opens in expanded view automatically when the dashboard loads. All other panels collapse to a compact strip below it.
               </div>
               <select
@@ -425,16 +306,7 @@ export default function SettingsPanel() {
                   if (expandedPanel) setPanelView(expandedPanel, 'normal')
                   if (val) toggleExpand(val)
                 }}
-                style={{
-                  width: '100%',
-                  padding: '7px 10px',
-                  background: 'var(--bg-tertiary)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 6,
-                  color: 'var(--text-primary)',
-                  fontSize: 12,
-                  cursor: 'pointer',
-                }}
+                className="w-full py-[7px] px-[10px] bg-bg-tertiary border border-border-color rounded-[6px] text-text-primary text-[12px] cursor-pointer"
               >
                 <option value="">— None (grid layout on load) —</option>
                 {Object.entries(PANEL_LABELS).map(([id, meta]) => (
@@ -444,50 +316,34 @@ export default function SettingsPanel() {
                 ))}
               </select>
               {defaultExpandedPanel && (
-                <div style={{ marginTop: 8, fontSize: 11, color: 'var(--sensor-acoustic)' }}>
+                <div className="mt-2 text-[11px] text-sensor-acoustic">
                   ✓ On next load: <strong>{PANEL_LABELS[defaultExpandedPanel]?.icon} {PANEL_LABELS[defaultExpandedPanel]?.label}</strong> will open expanded
                 </div>
               )}
             </div>
 
             {/* Live view controls */}
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 8, padding: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 12, color: 'var(--text-primary)' }}>
+            <div className="bg-bg-secondary border border-border-color rounded-lg p-4">
+              <div className="text-[12px] font-bold mb-3 text-text-primary">
                 Quick View Controls
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="flex flex-col gap-1.5">
                 {Object.entries(PANEL_LABELS).map(([id, meta]) => (
-                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: 'var(--panel-bg)', border: '1px solid var(--border-color)', borderRadius: 6 }}>
-                    <span style={{ fontSize: 14 }}>{meta.icon}</span>
-                    <span style={{ flex: 1, fontSize: 12, color: 'var(--text-primary)' }}>{meta.label}</span>
-                    <div style={{ display: 'flex', gap: 4 }}>
+                  <div key={id} className="flex items-center gap-[10px] py-2 px-[10px] bg-panel-bg border border-border-color rounded-[6px]">
+                    <span className="text-[14px]">{meta.icon}</span>
+                    <span className="flex-1 text-[12px] text-text-primary">{meta.label}</span>
+                    <div className="flex gap-1">
                       <button
                         onClick={() => setPanelView(id, 'normal')}
                         title="Restore to normal"
-                        style={{
-                          padding: '3px 8px',
-                          background: 'var(--bg-tertiary)',
-                          border: '1px solid var(--border-color)',
-                          borderRadius: 4,
-                          color: 'var(--text-secondary)',
-                          cursor: 'pointer',
-                          fontSize: 10,
-                        }}
+                        className={ctrlBtnBase}
                       >
                         Normal
                       </button>
                       <button
                         onClick={() => setPanelView(id, 'minimized')}
                         title="Minimize"
-                        style={{
-                          padding: '3px 8px',
-                          background: 'var(--bg-tertiary)',
-                          border: '1px solid var(--border-color)',
-                          borderRadius: 4,
-                          color: 'var(--text-secondary)',
-                          cursor: 'pointer',
-                          fontSize: 10,
-                        }}
+                        className={ctrlBtnBase}
                       >
                         ▬ Min
                       </button>
@@ -497,14 +353,11 @@ export default function SettingsPanel() {
                           toggleExpand(id)
                         }}
                         title="Expand"
+                        className="py-[3px] px-2 rounded cursor-pointer text-[10px] border"
                         style={{
-                          padding: '3px 8px',
                           background: expandedPanel === id ? 'rgba(59,130,246,0.2)' : 'var(--bg-tertiary)',
-                          border: `1px solid ${expandedPanel === id ? 'var(--accent-blue)' : 'var(--border-color)'}`,
-                          borderRadius: 4,
+                          borderColor: expandedPanel === id ? 'var(--accent-blue)' : 'var(--border-color)',
                           color: expandedPanel === id ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                          cursor: 'pointer',
-                          fontSize: 10,
                           fontWeight: expandedPanel === id ? 700 : 400,
                         }}
                       >
@@ -517,9 +370,9 @@ export default function SettingsPanel() {
             </div>
 
             {/* How-to tip */}
-            <div style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 8, padding: 12 }}>
-              <div style={{ fontSize: 11, color: 'var(--accent-blue)', fontWeight: 700, marginBottom: 4 }}>💡 Usage Tips</div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+            <div className="bg-[rgba(59,130,246,0.05)] border border-[rgba(59,130,246,0.2)] rounded-lg p-3">
+              <div className="text-[11px] text-accent-blue font-bold mb-1">💡 Usage Tips</div>
+              <div className="text-[11px] text-text-secondary leading-[1.7]">
                 • Click <strong>⤢</strong> on any panel header to expand it<br />
                 • Click <strong>▬</strong> on any panel header to minimize it to a strip<br />
                 • When expanded, all other panels collapse to a compact strip at the bottom<br />
@@ -532,8 +385,8 @@ export default function SettingsPanel() {
 
         {/* ── THRESHOLDS TAB ── */}
         {activeTab === 'thresholds' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, lineHeight: 1.5 }}>
+          <div className="flex flex-col gap-3">
+            <div className="text-[11px] text-text-secondary mb-1 leading-relaxed">
               Configure alert thresholds and update rates per widget. Higher update rates consume more bandwidth.
             </div>
 
@@ -541,23 +394,17 @@ export default function SettingsPanel() {
               const widgets = widgetsByCategory[cat] ?? []
               return (
                 <div key={cat}>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+                  <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-1.5">
                     {CATEGORY_ICONS[cat]} {cat}
                   </div>
                   {widgets.map((widget) => (
                     <div
                       key={widget.id}
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: 6,
-                        padding: '10px 12px',
-                        marginBottom: 6,
-                      }}
+                      className="bg-bg-secondary border border-border-color rounded-[6px] px-3 py-[10px] mb-1.5"
                     >
-                      <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 8 }}>{widget.label}</div>
-                      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                        <label style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div className="text-[11px] font-semibold mb-2">{widget.label}</div>
+                      <div className="flex gap-3 flex-wrap">
+                        <label className="text-[11px] text-text-secondary flex flex-col gap-1">
                           Update rate (Hz)
                           <input
                             type="number"
@@ -566,18 +413,10 @@ export default function SettingsPanel() {
                             step={0.5}
                             value={widget.updateRateHz ?? 1}
                             onChange={(e) => setWidgetOption(widget.id, 'updateRateHz', Number(e.target.value))}
-                            style={{
-                              width: 80,
-                              padding: '3px 6px',
-                              background: 'var(--bg-tertiary)',
-                              border: '1px solid var(--border-color)',
-                              borderRadius: 4,
-                              color: 'var(--text-primary)',
-                              fontSize: 11,
-                            }}
+                            className="w-20 py-[3px] px-1.5 bg-bg-tertiary border border-border-color rounded text-text-primary text-[11px]"
                           />
                         </label>
-                        <label style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <label className="text-[11px] text-text-secondary flex flex-col gap-1">
                           Alert threshold
                           <input
                             type="number"
@@ -586,15 +425,7 @@ export default function SettingsPanel() {
                             step={1}
                             value={widget.threshold ?? 50}
                             onChange={(e) => setWidgetOption(widget.id, 'threshold', Number(e.target.value))}
-                            style={{
-                              width: 80,
-                              padding: '3px 6px',
-                              background: 'var(--bg-tertiary)',
-                              border: '1px solid var(--border-color)',
-                              borderRadius: 4,
-                              color: 'var(--text-primary)',
-                              fontSize: 11,
-                            }}
+                            className="w-20 py-[3px] px-1.5 bg-bg-tertiary border border-border-color rounded text-text-primary text-[11px]"
                           />
                         </label>
                       </div>
@@ -609,31 +440,13 @@ export default function SettingsPanel() {
       </div>
 
       {/* Footer actions */}
-      <div
-        style={{
-          padding: '10px 16px',
-          borderTop: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+      <div className="py-[10px] px-4 border-t border-border-color bg-bg-secondary flex justify-between items-center shrink-0">
+        <span className="text-[10px] text-text-secondary">
           Settings saved automatically to localStorage
         </span>
         <button
           onClick={resetToDefaults}
-          style={{
-            padding: '5px 12px',
-            background: 'transparent',
-            border: '1px solid var(--border-color)',
-            borderRadius: 4,
-            color: 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontSize: 11,
-          }}
+          className="py-[5px] px-3 bg-transparent border border-border-color rounded text-text-secondary cursor-pointer text-[11px]"
         >
           Reset to defaults
         </button>

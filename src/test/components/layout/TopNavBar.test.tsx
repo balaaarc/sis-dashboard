@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import TopNavBar from '../../../components/layout/TopNavBar'
-import { useSystemStore } from '../../../store/systemStore'
-import { useAlertStore } from '../../../store/alertStore'
-import type { Alert } from '../../../types/sensors'
+import { TopNavBar } from '@/components/layout/TopNavBar'
+import { useSystemStore } from '@/store/systemStore'
+import { useAlertStore } from '@/store/alertStore'
+import type { Alert } from '@/types/sensors'
 
 function makeAlert(id: string, acked = false): Alert {
   return {
@@ -65,8 +65,11 @@ describe('TopNavBar', () => {
 
   it('shows site selector dropdown with BOP-ALPHA-01 and BOP-BETA-01 options', () => {
     render(<TopNavBar />)
-    const select = screen.getByRole('combobox')
-    expect(select).toBeInTheDocument()
+    // Two comboboxes exist (site selector + scenario selector); pick the first (site)
+    const selects = screen.getAllByRole('combobox')
+    expect(selects.length).toBeGreaterThanOrEqual(1)
+    const siteSelect = selects[0]
+    expect(siteSelect).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'BOP-ALPHA-01' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'BOP-BETA-01' })).toBeInTheDocument()
   })
@@ -124,6 +127,11 @@ describe('TopNavBar', () => {
     })
     rerender(<TopNavBar />)
     expect(screen.getByText('ELEVATED')).toBeInTheDocument()
-    expect(screen.queryByText('NORMAL')).not.toBeInTheDocument()
+    // The scenario select value should reflect the new scenario
+    const selects = screen.getAllByRole('combobox')
+    const scenarioSelect = selects.find(
+      (s) => (s as HTMLSelectElement).value === 'ELEVATED'
+    )
+    expect(scenarioSelect).toBeDefined()
   })
 })

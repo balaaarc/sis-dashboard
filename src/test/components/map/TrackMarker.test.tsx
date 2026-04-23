@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import TrackMarker from '../../../components/map/TrackMarker'
-import type { Track } from '../../../types/sensors'
+import { TrackMarker } from '@/components/map/TrackMarker'
+import type { Track } from '@/types/sensors'
 
 function makeTrack(overrides: Partial<Track> = {}): Track {
   return {

@@ -45,9 +45,9 @@ export const useViewStore = create<ViewState>()((set, get) => ({
       const newMode: ViewMode = current === 'minimized' ? 'normal' : 'minimized'
       return {
         panelViews: { ...s.panelViews, [panelId]: newMode },
-        // If we're un-minimizing a panel that was in expanded state, clear expanded
+        // If the panel being toggled was the expanded panel, clear expanded
         expandedPanel:
-          newMode !== 'expanded' && s.expandedPanel === panelId
+          s.expandedPanel === panelId
             ? null
             : s.expandedPanel,
       }

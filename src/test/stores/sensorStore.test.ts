@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { act } from '@testing-library/react'
-import { useSensorStore } from '../../store/sensorStore'
-import type { SensorPayload, Track } from '../../types/sensors'
+import { useSensorStore } from '@/store/sensorStore'
+import type { SensorPayload, Track } from '@/types/sensors'
 
 function mockPayload(overrides?: Partial<SensorPayload>): SensorPayload {
   return {

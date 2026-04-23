@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useWebSocket } from '../../hooks/useWebSocket'
-import { useSensorStore } from '../../store/sensorStore'
-import { useAlertStore } from '../../store/alertStore'
-import { useSystemStore } from '../../store/systemStore'
-import type { SensorPayload, Track, ThreatAssessment, SystemHealth } from '../../types/sensors'
+import { renderHook, act } from '@testing-library/react'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { useSensorStore } from '@/store/sensorStore'
+import { useAlertStore } from '@/store/alertStore'
+import { useSystemStore } from '@/store/systemStore'
+import type { SensorPayload, Track, ThreatAssessment, SystemHealth } from '@/types/sensors'
 
 // ── helpers ──────────────────────────────────────────────────
 function resetStores() {
@@ -28,13 +28,7 @@ function resetStores() {
   })
 }
 
-function getLastWs(): InstanceType<typeof WebSocket> {
-  // MockWebSocket tracks instances — return the most recently created
-  const instances = (global.WebSocket as unknown as { instances?: WebSocket[] }).instances
-  return instances![instances!.length - 1]
-}
-
-function dispatchMessage(ws: WebSocket, type: string, payload: unknown) {
+function dispatchMessage(ws: { onmessage: ((ev: MessageEvent) => void) | null }, type: string, payload: unknown) {
   act(() => {
     const event = new MessageEvent('message', {
       data: JSON.stringify({ type, payload }),
@@ -221,16 +215,25 @@ describe('useWebSocket', () => {
       const ws = TrackingMockWS.instances[0]
 
       const health: SystemHealth = {
-        cpu_pct: 45,
-        mem_pct: 60,
-        uptime_s: 3600,
-        sensors_online: 18,
-        sensors_total: 20,
-        ws_clients: 1,
-        scenario: 'NORMAL',
+        timestamp: new Date().toISOString(),
+        node_id: 'BOP-ALPHA-01',
+        hardware: {
+          cpu_percent: 45,
+          gpu_percent: 67,
+          ram_percent: 52,
+          nvme_percent: 23,
+          temperature_c: 51,
+          uptime_hours: 72,
+        },
+        comms: { SATCOM: { active: true, signal_quality: 0.87 } },
+        aiml: {
+          inference_fps: 24.5,
+          gpu_memory_percent: 71,
+          model_versions: { detection: 'yolov9-v1.2' },
+        },
       }
       dispatchMessage(ws, 'SYSTEM_HEALTH', health)
-      expect(useSystemStore.getState().health?.cpu_pct).toBe(45)
+      expect(useSystemStore.getState().health?.hardware.cpu_percent).toBe(45)
     })
   })
 

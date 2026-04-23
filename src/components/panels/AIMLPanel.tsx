@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from 'react'
-import { useSensorStore } from '../../store/sensorStore'
-import { useAlertStore } from '../../store/alertStore'
-import { useSettingsStore } from '../../store/settingsStore'
-import ThreatGauge from '../widgets/ThreatGauge'
-import RadarScope from '../widgets/RadarScope'
-import { getThreatLevelColor, formatRelativeTime } from '../../utils/formatters'
-import type { ThreatLevel } from '../../types/sensors'
+import { useSensorStore } from '@/store/sensorStore'
+import { useAlertStore } from '@/store/alertStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { ThreatGauge } from '@/components/widgets/ThreatGauge'
+import { RadarScope } from '@/components/widgets/RadarScope'
+import { getThreatLevelColor, formatRelativeTime } from '@/utils/formatters'
+import type { ThreatLevel } from '@/types/sensors'
 
 // ── Fusion Event Log widget ──
 interface FusionEvent {
@@ -31,7 +31,7 @@ function useFusionEvents() {
           timestamp: new Date().toISOString(),
           scenario: SCENARIOS[Math.floor(Math.random() * SCENARIOS.length)],
           confidence: conf,
-          tier: conf > 0.8 ? 'HIGH' : conf > 0.6 ? 'MEDIUM' : 'LOW',
+          tier: (conf > 0.8 ? 'HIGH' : conf > 0.6 ? 'MEDIUM' : 'LOW') as FusionEvent['tier'],
           sensors: Array.from({ length: Math.ceil(Math.random() * 4) }, (_, i) => `S${String(Math.ceil(Math.random() * 20)).padStart(2, '0')}-${['GEO', 'ACU', 'THR', 'RAD'][i % 4]}`),
           decision: DECISIONS[Math.floor(Math.random() * DECISIONS.length)],
         }, ...prev].slice(0, 30))
@@ -69,14 +69,14 @@ function AnomalyArc({ value, label, color }: { value: number; label: string; col
   const angle = startAngle + value * sweep
   const largeArc = value * sweep > 180 ? 1 : 0
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="flex flex-col items-center">
       <svg width={80} height={72}>
         <path d={`M ${arcX(startAngle)} ${arcY(startAngle)} A ${r} ${r} 0 1 1 ${arcX(startAngle + sweep)} ${arcY(startAngle + sweep)}`} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={5} strokeLinecap="round" />
         {value > 0 && <path d={`M ${arcX(startAngle)} ${arcY(startAngle)} A ${r} ${r} 0 ${largeArc} 1 ${arcX(angle)} ${arcY(angle)}`} fill="none" stroke={color} strokeWidth={5} strokeLinecap="round" />}
         <text x={cx} y={cx - 2} textAnchor="middle" fill={color} fontSize={14} fontWeight={700} fontFamily="monospace">{(value * 100).toFixed(0)}</text>
         <text x={cx} y={cx + 10} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize={8}>/ 100</text>
       </svg>
-      <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: -8 }}>{label}</span>
+      <span className="text-[10px] text-text-secondary -mt-2">{label}</span>
     </div>
   )
 }
@@ -88,7 +88,7 @@ const TRACK_CLASS_COLORS: Record<string, string> = {
   UNKNOWN: '#94A3B8',
 }
 
-export default function AIMLPanel() {
+export function AIMLPanel() {
   const tracks = useSensorStore((s) => s.tracks)
   const threatAssessment = useAlertStore((s) => s.threatAssessment)
   const alerts = useAlertStore((s) => s.alerts)
@@ -119,27 +119,15 @@ export default function AIMLPanel() {
   ] as { id: typeof activeTab; label: string }[]
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Stats bar */}
-      <div
-        style={{
-          padding: '4px 12px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          flexShrink: 0,
-          gap: 8,
-          fontSize: 10,
-        }}
-      >
-        <span style={{ color: 'var(--text-secondary)' }}>
+      <div className="px-3 py-1 border-b border-border-color bg-bg-secondary flex items-center justify-end shrink-0 gap-2 text-[10px]">
+        <span className="text-text-secondary">
           Tracks:{' '}
-          <strong style={{ color: 'var(--text-primary)' }}>{tracks.length}</strong>
+          <strong className="text-text-primary">{tracks.length}</strong>
         </span>
         {threatAssessment && (
-          <span style={{ color: 'var(--text-secondary)' }}>
+          <span className="text-text-secondary">
             v{threatAssessment.model_version}
           </span>
         )}
@@ -147,23 +135,17 @@ export default function AIMLPanel() {
 
       {/* Sub-tabs */}
       {TABS.length > 1 && (
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+        <div className="flex border-b border-border-color shrink-0">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              style={{
-                flex: 1,
-                padding: '5px 4px',
-                border: 'none',
-                borderBottom: activeTab === t.id ? '2px solid var(--accent-blue)' : '2px solid transparent',
-                background: 'transparent',
-                color: activeTab === t.id ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                fontSize: 10,
-                fontWeight: activeTab === t.id ? 700 : 400,
-                whiteSpace: 'nowrap',
-              }}
+              className={[
+                'flex-1 py-[5px] px-1 border-none bg-transparent cursor-pointer text-[10px] whitespace-nowrap',
+                activeTab === t.id
+                  ? 'border-b-2 border-accent-blue text-accent-blue font-bold'
+                  : 'border-b-2 border-transparent text-text-secondary font-normal',
+              ].join(' ')}
             >
               {t.label}
             </button>
@@ -173,22 +155,26 @@ export default function AIMLPanel() {
 
       {/* Fusion Event Log tab */}
       {activeTab === 'fusion' && showFusion && (
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <div style={{ padding: 8 }}>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="p-2">
             {fusionEvents.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)', fontSize: 11 }}>Awaiting fusion events...</div>
+              <div className="text-center py-6 text-text-secondary text-[11px]">Awaiting fusion events...</div>
             ) : fusionEvents.map((ev) => {
               const tierColor = ev.tier === 'HIGH' ? 'var(--alert-critical)' : ev.tier === 'MEDIUM' ? 'var(--alert-medium)' : 'var(--alert-low)'
               return (
-                <div key={ev.id} style={{ background: 'var(--bg-secondary)', border: `1px solid var(--border-color)`, borderLeft: `3px solid ${tierColor}`, borderRadius: 4, padding: '6px 8px', marginBottom: 5 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 3 }}>
-                    <span style={{ fontWeight: 700, color: tierColor }}>{ev.scenario}</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{new Date(ev.timestamp).toLocaleTimeString()}</span>
+                <div
+                  key={ev.id}
+                  className="bg-bg-secondary border border-border-color rounded mb-[5px] px-2 py-1.5"
+                  style={{ borderLeft: `3px solid ${tierColor}` }}
+                >
+                  <div className="flex justify-between text-[10px] mb-[3px]">
+                    <span className="font-bold" style={{ color: tierColor }}>{ev.scenario}</span>
+                    <span className="text-text-secondary">{new Date(ev.timestamp).toLocaleTimeString()}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 3 }}>
-                    Sensors: {ev.sensors.join(', ')} · Conf: <strong style={{ color: 'var(--text-primary)' }}>{(ev.confidence * 100).toFixed(0)}%</strong>
+                  <div className="text-[10px] text-text-secondary mb-[3px]">
+                    Sensors: {ev.sensors.join(', ')} · Conf: <strong className="text-text-primary">{(ev.confidence * 100).toFixed(0)}%</strong>
                   </div>
-                  <div style={{ fontSize: 10, color: tierColor, fontWeight: 600 }}>⚡ {ev.decision}</div>
+                  <div className="text-[10px] font-semibold" style={{ color: tierColor }}>⚡ {ev.decision}</div>
                 </div>
               )
             })}
@@ -198,35 +184,35 @@ export default function AIMLPanel() {
 
       {/* Anomaly Score Gauge tab */}
       {activeTab === 'anomaly' && showAnomaly && (
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 10 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 10 }}>
+        <div className="flex-1 min-h-0 overflow-y-auto p-[10px]">
+          <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-[10px]">
             Anomaly Detection Scores
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 12 }}>
+          <div className="flex justify-around mb-3">
             <AnomalyArc value={anomalyScores.isolationForest} label="Isolation Forest" color={anomalyScores.isolationForest > 0.5 ? 'var(--alert-critical)' : anomalyScores.isolationForest > 0.3 ? 'var(--alert-medium)' : 'var(--sensor-acoustic)'} />
             <AnomalyArc value={anomalyScores.lstm} label="LSTM" color={anomalyScores.lstm > 0.5 ? 'var(--alert-critical)' : anomalyScores.lstm > 0.3 ? 'var(--alert-medium)' : 'var(--accent-blue)'} />
             <AnomalyArc value={anomalyScores.combined} label="Combined" color={anomalyScores.combined > 0.5 ? 'var(--alert-critical)' : anomalyScores.combined > 0.3 ? 'var(--alert-medium)' : 'var(--sensor-acoustic)'} />
           </div>
-          <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6, padding: 10, fontSize: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, color: 'var(--text-secondary)' }}>
+          <div className="bg-bg-secondary border border-border-color rounded-md p-[10px] text-[10px]">
+            <div className="flex justify-between mb-1.5 text-text-secondary">
               <span>Amber threshold</span>
-              <span style={{ color: 'var(--alert-medium)', fontFamily: 'monospace' }}>30</span>
+              <span className="text-alert-medium font-mono">30</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
+            <div className="flex justify-between text-text-secondary">
               <span>Red threshold</span>
-              <span style={{ color: 'var(--alert-critical)', fontFamily: 'monospace' }}>50</span>
+              <span className="text-alert-critical font-mono">50</span>
             </div>
           </div>
           {showTraj && tracks.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+            <div className="mt-[10px]">
+              <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-1.5">
                 Trajectory Predictions
               </div>
               {tracks.slice(0, 3).map((t) => (
-                <div key={t.track_id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', color: 'var(--text-secondary)' }}>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--accent-teal)' }}>{t.track_id.slice(-8)}</span>
+                <div key={t.track_id} className="flex justify-between text-[10px] py-1 border-b border-[rgba(255,255,255,0.04)] text-text-secondary">
+                  <span className="font-mono text-accent-teal">{t.track_id.slice(-8)}</span>
                   <span>{t.class} · {t.heading.toFixed(0)}° · {t.velocity.toFixed(1)} m/s</span>
-                  <span style={{ color: 'var(--accent-blue)' }}>→ {(t.range_m + t.velocity * 5).toFixed(0)}m</span>
+                  <span className="text-accent-blue">→ {(t.range_m + t.velocity * 5).toFixed(0)}m</span>
                 </div>
               ))}
             </div>
@@ -236,51 +222,28 @@ export default function AIMLPanel() {
 
       {/* Intelligence tab (existing content) */}
       {(activeTab === 'intel' || TABS.length === 1) && (
-      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+      <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
         {/* Top section: gauge + radar side by side */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-            padding: 8,
-            flexShrink: 0,
-          }}
-        >
+        <div className="flex gap-2 p-2 shrink-0">
           {/* Threat gauge */}
-          <div
-            style={{
-              flex: '0 0 160px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>
+          <div className="flex flex-col items-center gap-1 flex-none w-40">
+            <div className="text-[10px] text-text-secondary tracking-[0.1em] uppercase font-bold">
               Threat Score
             </div>
             <ThreatGauge score={threatScore} level={threatLevel} />
             {threatAssessment && (
-              <div style={{ fontSize: 10, color: 'var(--text-secondary)', textAlign: 'center' }}>
+              <div className="text-[10px] text-text-secondary text-center">
                 {formatRelativeTime(threatAssessment.timestamp)}
               </div>
             )}
           </div>
 
           {/* Radar scope */}
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              minWidth: 0,
-            }}
-          >
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>
+          <div className="flex-1 flex flex-col items-center min-w-0">
+            <div className="text-[10px] text-text-secondary tracking-[0.1em] uppercase font-bold mb-1">
               PPI Radar
             </div>
-            <div style={{ width: '100%', maxWidth: 220 }}>
+            <div className="w-full max-w-[220px]">
               <RadarScope tracks={tracks} maxRange={2000} size={220} />
             </div>
           </div>
@@ -288,30 +251,24 @@ export default function AIMLPanel() {
 
         {/* Track breakdown */}
         {tracks.length > 0 && (
-          <div style={{ padding: '4px 12px 8px', flexShrink: 0 }}>
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>
+          <div className="px-3 pb-2 pt-1 shrink-0">
+            <div className="text-[10px] text-text-secondary tracking-[0.1em] uppercase font-bold mb-1.5">
               Track Classification
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="flex gap-2 flex-wrap">
               {Object.entries(trackBreakdown).map(([cls, count]) => {
                 const color = TRACK_CLASS_COLORS[cls] ?? '#94A3B8'
                 const pct = ((count / tracks.length) * 100).toFixed(0)
                 return (
-                  <div key={cls} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <div key={cls} className="flex items-center gap-[5px]">
                     <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: color,
-                        display: 'inline-block',
-                        boxShadow: `0 0 4px ${color}`,
-                      }}
+                      className="inline-block w-2 h-2 rounded-full shrink-0"
+                      style={{ background: color, boxShadow: `0 0 4px ${color}` }}
                     />
-                    <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+                    <span className="text-[10px] text-text-secondary">
                       {cls}
                     </span>
-                    <span style={{ fontSize: 10, color, fontWeight: 700 }}>
+                    <span className="text-[10px] font-bold" style={{ color }}>
                       {count} ({pct}%)
                     </span>
                   </div>
@@ -323,53 +280,41 @@ export default function AIMLPanel() {
 
         {/* Track table */}
         {tracks.length > 0 && (
-          <div style={{ padding: '0 8px 8px', flexShrink: 0 }}>
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>
+          <div className="px-2 pb-2 shrink-0">
+            <div className="text-[10px] text-text-secondary tracking-[0.1em] uppercase font-bold mb-1">
               Active Tracks
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
-                gap: 0,
-                fontSize: 10,
-                fontFamily: 'monospace',
-              }}
-            >
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-0 text-[10px] font-mono">
               {/* Header */}
               {['Track ID', 'Class', 'Hdg', 'Vel', 'Conf'].map((h) => (
                 <div
                   key={h}
-                  style={{
-                    padding: '3px 6px',
-                    color: 'var(--text-secondary)',
-                    fontWeight: 700,
-                    letterSpacing: '0.06em',
-                    borderBottom: '1px solid var(--border-color)',
-                    textTransform: 'uppercase',
-                  }}
+                  className="px-1.5 py-[3px] text-text-secondary font-bold tracking-[0.06em] border-b border-border-color uppercase"
                 >
                   {h}
                 </div>
               ))}
               {/* Rows */}
-              {tracks.slice(0, 8).map((track, i) => {
+              {tracks.slice(0, 8).map((track) => {
                 const color = TRACK_CLASS_COLORS[track.class] ?? '#94A3B8'
                 return (
                   <React.Fragment key={track.track_id}>
-                    <div style={{ padding: '3px 6px', color: 'var(--accent-teal)', borderBottom: '1px solid var(--bg-tertiary)' }}>
+                    <div className="px-1.5 py-[3px] text-accent-teal border-b border-bg-tertiary">
                       {track.track_id.slice(-8)}
                     </div>
-                    <div style={{ padding: '3px 6px', color, fontWeight: 700, borderBottom: '1px solid var(--bg-tertiary)' }}>
+                    <div className="px-1.5 py-[3px] font-bold border-b border-bg-tertiary" style={{ color }}>
                       {track.class.charAt(0)}
                     </div>
-                    <div style={{ padding: '3px 6px', color: 'var(--text-primary)', borderBottom: '1px solid var(--bg-tertiary)' }}>
+                    <div className="px-1.5 py-[3px] text-text-primary border-b border-bg-tertiary">
                       {track.heading.toFixed(0)}°
                     </div>
-                    <div style={{ padding: '3px 6px', color: 'var(--text-primary)', borderBottom: '1px solid var(--bg-tertiary)' }}>
+                    <div className="px-1.5 py-[3px] text-text-primary border-b border-bg-tertiary">
                       {track.velocity.toFixed(1)}
                     </div>
-                    <div style={{ padding: '3px 6px', color: track.confidence > 0.7 ? 'var(--sensor-acoustic)' : 'var(--alert-medium)', borderBottom: '1px solid var(--bg-tertiary)' }}>
+                    <div
+                      className="px-1.5 py-[3px] border-b border-bg-tertiary"
+                      style={{ color: track.confidence > 0.7 ? 'var(--sensor-acoustic)' : 'var(--alert-medium)' }}
+                    >
                       {(track.confidence * 100).toFixed(0)}%
                     </div>
                   </React.Fragment>
@@ -377,7 +322,7 @@ export default function AIMLPanel() {
               })}
             </div>
             {tracks.length > 8 && (
-              <div style={{ fontSize: 10, color: 'var(--text-secondary)', padding: '4px 6px' }}>
+              <div className="text-[10px] text-text-secondary px-1.5 py-1">
                 +{tracks.length - 8} more tracks
               </div>
             )}
@@ -387,33 +332,30 @@ export default function AIMLPanel() {
         {/* Threat details */}
         {threatAssessment && (
           <div
+            className="mx-2 mb-2 p-[10px] rounded-md shrink-0"
             style={{
-              margin: '0 8px 8px',
-              padding: 10,
               background: `${levelColor}11`,
               border: `1px solid ${levelColor}33`,
-              borderRadius: 6,
-              flexShrink: 0,
             }}
           >
-            <div style={{ fontSize: 10, color: levelColor, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+            <div className="text-[10px] font-bold tracking-[0.08em] uppercase mb-1.5" style={{ color: levelColor }}>
               Threat Assessment
             </div>
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+            <div className="text-[10px] text-text-secondary leading-[1.7]">
               <div>
-                <span style={{ color: 'var(--text-secondary)' }}>Location: </span>
-                <span style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                <span className="text-text-secondary">Location: </span>
+                <span className="text-text-primary font-mono">
                   {threatAssessment.location.lat.toFixed(4)}°N, {threatAssessment.location.lon.toFixed(4)}°E
                 </span>
-                <span style={{ color: 'var(--text-secondary)', marginLeft: 6 }}>
+                <span className="text-text-secondary ml-1.5">
                   ±{threatAssessment.location.accuracy_m}m
                 </span>
               </div>
               <div>
-                <span style={{ color: 'var(--text-secondary)' }}>Dominant: </span>
-                <span style={{ color: 'var(--accent-teal)' }}>{threatAssessment.dominant_modality}</span>
+                <span className="text-text-secondary">Dominant: </span>
+                <span className="text-accent-teal">{threatAssessment.dominant_modality}</span>
               </div>
-              <div style={{ color: levelColor, fontWeight: 500, marginTop: 4 }}>
+              <div className="font-medium mt-1" style={{ color: levelColor }}>
                 ⚡ {threatAssessment.recommended_action}
               </div>
             </div>
@@ -422,8 +364,8 @@ export default function AIMLPanel() {
 
         {/* Recent alerts mini-list */}
         {recentAlerts.length > 0 && (
-          <div style={{ padding: '0 8px 8px', flex: 1, minHeight: 0, overflow: 'auto' }}>
-            <div style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 4 }}>
+          <div className="px-2 pb-2 flex-1 min-h-0 overflow-auto">
+            <div className="text-[10px] text-text-secondary tracking-[0.1em] uppercase font-bold mb-1">
               Recent Events
             </div>
             {recentAlerts.map((alert) => {
@@ -431,29 +373,17 @@ export default function AIMLPanel() {
               return (
                 <div
                   key={alert.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '4px 6px',
-                    borderRadius: 4,
-                    marginBottom: 2,
-                    background: alert.acknowledged ? 'transparent' : `${color}0A`,
-                  }}
+                  className="flex items-center gap-2 px-1.5 py-1 rounded mb-0.5"
+                  style={{ background: alert.acknowledged ? 'transparent' : `${color}0A` }}
                 >
                   <span
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: '50%',
-                      background: color,
-                      flexShrink: 0,
-                    }}
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: color }}
                   />
-                  <span style={{ fontSize: 10, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span className="text-[10px] text-text-primary flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                     {alert.classification}
                   </span>
-                  <span style={{ fontSize: 10, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                  <span className="text-[10px] text-text-secondary shrink-0">
                     {formatRelativeTime(alert.timestamp)}
                   </span>
                 </div>
@@ -463,7 +393,7 @@ export default function AIMLPanel() {
         )}
 
         {tracks.length === 0 && !threatAssessment && (
-          <div className="no-data" style={{ flex: 1 }}>
+          <div className="no-data flex-1">
             <span className="no-data-icon">🤖</span>
             <span>Awaiting AI/ML data...</span>
           </div>

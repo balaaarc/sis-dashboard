@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SensorPayload, Track } from '../types/sensors'
+import type { SensorPayload, Track } from '@/types/sensors'
 
 const MAX_HISTORY = 100
 
@@ -13,7 +13,7 @@ interface SensorState {
   selectSensor: (id: string | null) => void
 }
 
-export const useSensorStore = create<SensorState>()((set, get) => ({
+export const useSensorStore = create<SensorState>()((set) => ({
   sensors: new Map(),
   sensorHistory: new Map(),
   tracks: [],

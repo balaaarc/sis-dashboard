@@ -1,9 +1,9 @@
 import React from 'react'
-import { useSystemStore } from '../../store/systemStore'
-import { useAlertStore } from '../../store/alertStore'
-import { useSettingsStore } from '../../store/settingsStore'
-import { getSensorFamilyColor } from '../../utils/formatters'
-import type { SensorFamily, ThreatLevel } from '../../types/sensors'
+import { useSystemStore } from '@/store/systemStore'
+import { useAlertStore } from '@/store/alertStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { getSensorFamilyColor } from '@/utils/formatters'
+import type { SensorFamily, ThreatLevel } from '@/types/sensors'
 
 const CORE_PANELS = [
   { id: 'map',     label: 'Live Map',   icon: '🗺' },
@@ -39,7 +39,7 @@ const THREAT_LEVELS: { level: ThreatLevel; color: string }[] = [
   { level: 'LOW', color: 'var(--alert-low)' },
 ]
 
-export default function LeftSidebar() {
+export function LeftSidebar() {
   const collapsed            = useSystemStore((s) => s.sidebarCollapsed)
   const toggleSidebar        = useSystemStore((s) => s.toggleSidebar)
   const activePanel          = useSystemStore((s) => s.activePanel)
@@ -71,37 +71,28 @@ export default function LeftSidebar() {
     return (
       <button
         onClick={handleClick}
+        className="w-full flex items-center gap-[9px] py-2 px-[14px] border-none text-[12px] text-left transition-[color,background,border-color] duration-150 cursor-pointer"
         style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 9,
-          padding: '8px 14px',
-          border: 'none',
           borderLeft: `2px solid ${active ? 'var(--accent-blue)' : 'transparent'}`,
           background: active ? 'rgba(59,130,246,0.1)' : 'transparent',
           color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
-          cursor: 'pointer',
-          fontSize: 12,
           fontWeight: active ? 600 : 400,
-          textAlign: 'left',
-          transition: 'color 0.15s ease, background 0.15s ease, border-color 0.15s ease',
         }}
         onMouseEnter={(e) => {
           if (!active) {
-            (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'
+            ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-hover)'
             ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)'
           }
         }}
         onMouseLeave={(e) => {
           if (!active) {
-            (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLButtonElement).style.background = 'transparent'
             ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'
           }
         }}
       >
-        <span style={{ fontSize: 14, flexShrink: 0 }}>{panel.icon}</span>
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span className="text-[14px] shrink-0">{panel.icon}</span>
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap">
           {panel.label}
         </span>
       </button>
@@ -109,73 +100,39 @@ export default function LeftSidebar() {
   }
 
   const SectionHeader = ({ children, extra }: { children: React.ReactNode; extra?: React.ReactNode }) => (
-    <div style={{
-      fontSize: 9,
-      fontWeight: 800,
-      letterSpacing: '0.12em',
-      color: 'var(--text-muted)',
-      padding: '10px 14px 5px',
-      textTransform: 'uppercase',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
+    <div className="text-[9px] font-black tracking-[0.12em] text-text-muted py-[10px] px-[14px] pb-[5px] uppercase flex items-center justify-between">
       {children}
       {extra}
     </div>
   )
 
   const Divider = () => (
-    <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
+    <div className="h-px bg-border-subtle my-1" />
   )
 
   return (
     <aside
-      className={`sis-sidebar${mobileSidebarOpen ? ' mobile-open' : ''}`}
+      className={`sis-sidebar${mobileSidebarOpen ? ' mobile-open' : ''} h-full flex flex-col overflow-hidden relative shrink-0`}
       style={{
         width: collapsed ? 0 : 232,
         minWidth: collapsed ? 0 : 232,
-        height: '100%',
         background: 'var(--panel-header-bg)',
         borderRight: '1px solid var(--panel-border)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
         transition: 'width 200ms ease, min-width 200ms ease',
-        position: 'relative',
-        flexShrink: 0,
       }}
     >
       {/* Collapse toggle — desktop only */}
       <button
-        className="sidebar-collapse-btn"
+        className="sidebar-collapse-btn absolute top-[9px] w-[22px] h-[22px] rounded border border-border-color bg-bg-tertiary text-text-secondary cursor-pointer flex items-center justify-center text-[11px] z-10 shrink-0 transition-[right] duration-200"
         onClick={toggleSidebar}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        style={{
-          position: 'absolute',
-          top: 9,
-          right: collapsed ? -30 : 8,
-          width: 22,
-          height: 22,
-          borderRadius: 4,
-          border: '1px solid var(--border-color)',
-          background: 'var(--bg-tertiary)',
-          color: 'var(--text-secondary)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 11,
-          zIndex: 10,
-          transition: 'right 200ms ease',
-          flexShrink: 0,
-        }}
+        style={{ right: collapsed ? -30 : 8 }}
       >
         {collapsed ? '›' : '‹'}
       </button>
 
       {!collapsed && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1, overflow: 'auto', paddingTop: 4 }}>
+        <div className="flex flex-col flex-1 overflow-auto pt-1">
           {/* Panel Navigator */}
           <div>
             <SectionHeader>Panels</SectionHeader>
@@ -187,15 +144,7 @@ export default function LeftSidebar() {
               <>
                 <SectionHeader
                   extra={
-                    <span style={{
-                      fontSize: 9,
-                      background: 'rgba(59,130,246,0.15)',
-                      color: 'var(--accent-blue)',
-                      border: '1px solid rgba(59,130,246,0.25)',
-                      borderRadius: 3,
-                      padding: '1px 5px',
-                      fontWeight: 700,
-                    }}>
+                    <span className="text-[9px] bg-[rgba(59,130,246,0.15)] text-accent-blue border border-[rgba(59,130,246,0.25)] rounded-[3px] py-[1px] px-[5px] font-bold">
                       {visibleNew.length}
                     </span>
                   }
@@ -229,20 +178,11 @@ export default function LeftSidebar() {
                     setFilter({ sensorFamily: isActive ? 'ALL' : family })
                     setMobileSidebarOpen(false)
                   }}
+                  className="w-full flex items-center gap-[9px] py-[7px] px-[14px] border-none text-[12px] text-left transition-[color,background,border-color] duration-150 cursor-pointer"
                   style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 9,
-                    padding: '7px 14px',
-                    border: 'none',
                     borderLeft: `2px solid ${isActive ? color : 'transparent'}`,
                     background: isActive ? `${color}14` : 'transparent',
                     color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 12,
-                    textAlign: 'left',
-                    transition: 'color 0.15s ease, background 0.15s ease, border-color 0.15s ease',
                     fontWeight: isActive ? 600 : 400,
                   }}
                   onMouseEnter={(e) => {
@@ -259,14 +199,10 @@ export default function LeftSidebar() {
                   }}
                 >
                   <span
+                    className="w-2 h-2 rounded-full shrink-0 transition-shadow duration-150"
                     style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
                       background: color,
                       boxShadow: isActive ? `0 0 7px ${color}` : 'none',
-                      flexShrink: 0,
-                      transition: 'box-shadow 0.15s ease',
                     }}
                   />
                   {family}
@@ -278,9 +214,9 @@ export default function LeftSidebar() {
           <Divider />
 
           {/* Alert Summary */}
-          <div style={{ padding: '8px 14px 12px' }}>
+          <div className="py-2 px-[14px] pb-3">
             <SectionHeader>Active Alerts</SectionHeader>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginTop: 4 }}>
+            <div className="flex flex-col gap-[5px] mt-1">
               {THREAT_LEVELS.map(({ level, color }) => {
                 const count = alertCountByLevel(level)
                 const isFiltered = filter.threatLevel === level
@@ -290,33 +226,21 @@ export default function LeftSidebar() {
                     onClick={() =>
                       setFilter({ threatLevel: isFiltered ? 'ALL' : level })
                     }
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      cursor: 'pointer',
-                      padding: '4px 6px',
-                      borderRadius: 5,
-                      background: isFiltered ? `${color}12` : 'transparent',
-                      transition: 'background 0.15s ease',
-                    }}
+                    className="flex items-center justify-between cursor-pointer py-1 px-1.5 rounded-[5px] transition-[background] duration-150"
+                    style={{ background: isFiltered ? `${color}12` : 'transparent' }}
                   >
-                    <span style={{ fontSize: 11, color: isFiltered ? color : 'var(--text-secondary)', fontWeight: isFiltered ? 600 : 400, transition: 'color 0.15s ease' }}>{level}</span>
                     <span
+                      className="text-[11px] transition-colors duration-150"
+                      style={{ color: isFiltered ? color : 'var(--text-secondary)', fontWeight: isFiltered ? 600 : 400 }}
+                    >
+                      {level}
+                    </span>
+                    <span
+                      className="min-w-[22px] h-[18px] rounded-[9px] text-[10px] font-bold flex items-center justify-center px-[5px] font-mono"
                       style={{
-                        minWidth: 22,
-                        height: 18,
-                        borderRadius: 9,
                         background: count > 0 ? `${color}20` : 'var(--bg-tertiary)',
                         border: `1px solid ${count > 0 ? `${color}40` : 'transparent'}`,
                         color: count > 0 ? color : 'var(--text-muted)',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: '0 5px',
-                        fontFamily: 'monospace',
                       }}
                     >
                       {count}

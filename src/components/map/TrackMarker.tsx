@@ -6,7 +6,7 @@
 import React from 'react'
 import { Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
-import type { Track } from '../../types/sensors'
+import type { Track } from '@/types/sensors'
 
 // ── Colour per track class ──────────────────────────────────
 function trackColor(cls: Track['class']): string {
@@ -52,7 +52,7 @@ interface Props {
   track: Track
 }
 
-const TrackMarker: React.FC<Props> = ({ track }) => {
+export const TrackMarker: React.FC<Props> = ({ track }) => {
   const color = trackColor(track.class)
   const icon = buildArrowIcon(track.heading, color)
   const position: [number, number] = [track.lat, track.lon]
@@ -132,4 +132,3 @@ const TrackMarker: React.FC<Props> = ({ track }) => {
   )
 }
 
-export default TrackMarker

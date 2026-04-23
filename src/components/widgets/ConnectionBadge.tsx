@@ -1,23 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { useSystemStore } from '../../store/systemStore'
-
-const dotBase: React.CSSProperties = {
-  width: 8,
-  height: 8,
-  borderRadius: '50%',
-  flexShrink: 0,
-  display: 'inline-block',
-}
+import { useSystemStore } from '@/store/systemStore'
 
 const RETRY_SECONDS = 10
 
-export default function ConnectionBadge() {
+export function ConnectionBadge() {
   const status = useSystemStore((s) => s.connectionStatus)
   const reconnect = useSystemStore((s) => s.reconnect)
   const [countdown, setCountdown] = useState(RETRY_SECONDS)
   const intervalRef = useRef<ReturnType<typeof setInterval>>()
 
-  // Auto-retry countdown when disconnected
   useEffect(() => {
     if (status !== 'disconnected') {
       setCountdown(RETRY_SECONDS)
@@ -39,28 +30,28 @@ export default function ConnectionBadge() {
     return () => clearInterval(intervalRef.current)
   }, [status, reconnect])
 
-  let color: string
+  let dotColor: string
   let label: string
   let animated = false
 
   switch (status) {
     case 'connected':
-      color = 'var(--sensor-acoustic)'
+      dotColor = 'var(--sensor-acoustic)'
       label = 'Connected'
       break
     case 'reconnecting':
-      color = 'var(--alert-medium)'
-      label = 'Reconnecting…'
+      dotColor = 'var(--alert-medium)'
+      label = 'Reconnecting...'
       animated = true
       break
     case 'disconnected':
-      color = 'var(--alert-critical)'
+      dotColor = 'var(--alert-critical)'
       label = 'Disconnected'
       break
     case 'connecting':
     default:
-      color = 'var(--alert-medium)'
-      label = 'Connecting…'
+      dotColor = 'var(--alert-medium)'
+      label = 'Connecting...'
       animated = true
       break
   }
@@ -77,27 +68,14 @@ export default function ConnectionBadge() {
       `}</style>
 
       <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '0 10px',
-          height: 32,
-          borderRadius: 9999,
-          background: 'var(--bg-tertiary)',
-          border: `1px solid ${isDisconnected ? 'rgba(239,68,68,0.4)' : 'var(--border-color)'}`,
-          fontSize: 11,
-          fontWeight: 600,
-          color: 'var(--text-secondary)',
-          letterSpacing: '0.04em',
-          flexShrink: 0,
-        }}
+        className="flex items-center gap-1.5 px-[10px] h-8 rounded-full bg-bg-tertiary text-[11px] font-semibold text-text-secondary tracking-[0.04em] shrink-0"
+        style={{ border: `1px solid ${isDisconnected ? 'rgba(239,68,68,0.4)' : 'var(--border-color)'}` }}
       >
         <span
+          className="w-2 h-2 rounded-full shrink-0 inline-block"
           style={{
-            ...dotBase,
-            background: color,
-            boxShadow: `0 0 6px ${color}`,
+            background: dotColor,
+            boxShadow: `0 0 6px ${dotColor}`,
             ...(animated ? { animation: 'pulse 1.4s ease-in-out infinite' } : {}),
           }}
         />
@@ -107,27 +85,12 @@ export default function ConnectionBadge() {
 
         {isDisconnected && (
           <>
-            <span style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 400 }}>
+            <span className="text-text-secondary text-[10px] font-normal">
               — retry in {countdown}s
             </span>
             <button
               onClick={() => { reconnect(); setCountdown(RETRY_SECONDS) }}
-              style={{
-                marginLeft: 2,
-                padding: '0 8px',
-                height: 22,
-                borderRadius: 4,
-                border: '1px solid rgba(239,68,68,0.5)',
-                background: 'rgba(239,68,68,0.12)',
-                color: 'var(--alert-critical)',
-                cursor: 'pointer',
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                transition: 'background 0.15s',
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
+              className="ml-0.5 px-2 h-[22px] rounded border border-[rgba(239,68,68,0.5)] bg-[rgba(239,68,68,0.12)] text-alert-critical cursor-pointer text-[10px] font-bold tracking-[0.04em] transition-[background] duration-150 inline-flex items-center"
             >
               Connect Now
             </button>

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Alert, ThreatAssessment, ThreatLevel, SensorFamily } from '../types/sensors'
+import type { Alert, ThreatAssessment, ThreatLevel, SensorFamily } from '@/types/sensors'
 
 const MAX_ALERTS = 200
 

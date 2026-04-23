@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { SystemHealth, ScenarioType } from '../types/sensors'
+import type { SystemHealth, ScenarioType } from '@/types/sensors'
 
 type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'disconnected'
 
@@ -12,6 +12,7 @@ interface SystemState {
   sidebarCollapsed: boolean
   mobileSidebarOpen: boolean
   reconnectFn: (() => void) | null
+  sendMessageFn: ((msg: object) => void) | null
   setHealth: (h: SystemHealth) => void
   setTheme: (t: 'dark' | 'light') => void
   toggleTheme: () => void
@@ -23,6 +24,8 @@ interface SystemState {
   toggleMobileSidebar: () => void
   setReconnectFn: (fn: () => void) => void
   reconnect: () => void
+  setSendMessageFn: (fn: (msg: object) => void) => void
+  sendMessage: (msg: object) => void
 }
 
 function applyTheme(theme: 'dark' | 'light') {
@@ -41,6 +44,7 @@ export const useSystemStore = create<SystemState>()((set, get) => ({
   sidebarCollapsed: false,
   mobileSidebarOpen: false,
   reconnectFn: null,
+  sendMessageFn: null,
 
   setHealth: (h: SystemHealth) => {
     set({ health: h })
@@ -90,5 +94,13 @@ export const useSystemStore = create<SystemState>()((set, get) => ({
 
   reconnect: () => {
     get().reconnectFn?.()
+  },
+
+  setSendMessageFn: (fn: (msg: object) => void) => {
+    set({ sendMessageFn: fn })
+  },
+
+  sendMessage: (msg: object) => {
+    get().sendMessageFn?.(msg)
   },
 }))

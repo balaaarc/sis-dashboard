@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import ThreatGauge from '../../../components/widgets/ThreatGauge'
-import type { ThreatLevel } from '../../../types/sensors'
+import { ThreatGauge } from '@/components/widgets/ThreatGauge'
 
 describe('ThreatGauge', () => {
   it("renders without crashing with score=0, level='CLEAR'", () => {

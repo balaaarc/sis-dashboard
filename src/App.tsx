@@ -1,20 +1,25 @@
 import { useEffect } from 'react'
-import { useWebSocket } from './hooks/useWebSocket'
-import { useSystemStore } from './store/systemStore'
-import TopNavBar from './components/layout/TopNavBar'
-import LeftSidebar from './components/layout/LeftSidebar'
-import PanelGrid from './components/layout/PanelGrid'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { useSystemStore } from '@/store/systemStore'
+import { TopNavBar } from '@/components/layout/TopNavBar'
+import { LeftSidebar } from '@/components/layout/LeftSidebar'
+import { PanelGrid } from '@/components/layout/PanelGrid'
 
-export default function App() {
+export function App() {
   const theme = useSystemStore((s) => s.theme)
   const setReconnectFn = useSystemStore((s) => s.setReconnectFn)
+  const setSendMessageFn = useSystemStore((s) => s.setSendMessageFn)
   const mobileSidebarOpen = useSystemStore((s) => s.mobileSidebarOpen)
   const setMobileSidebarOpen = useSystemStore((s) => s.setMobileSidebarOpen)
-  const { connect } = useWebSocket()
+  const { connect, sendMessage } = useWebSocket()
 
   useEffect(() => {
     setReconnectFn(connect)
   }, [connect, setReconnectFn])
+
+  useEffect(() => {
+    setSendMessageFn(sendMessage)
+  }, [sendMessage, setSendMessageFn])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)

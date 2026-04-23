@@ -5,8 +5,8 @@
 
 import React from 'react'
 import { CircleMarker, Popup } from 'react-leaflet'
-import type { SensorPayload } from '../../types/sensors'
-import { formatRelativeTime, formatQualityScore } from '../../utils/formatters'
+import type { SensorPayload } from '@/types/sensors'
+import { formatRelativeTime, formatQualityScore } from '@/utils/formatters'
 
 // Derive a sensor family colour directly from the modality
 function modalityColor(modality: SensorPayload['modality']): string {
@@ -79,7 +79,7 @@ interface Props {
   sensor: SensorPayload
 }
 
-const SensorMarker: React.FC<Props> = ({ sensor }) => {
+export const SensorMarker: React.FC<Props> = ({ sensor }) => {
   const baseLat = sensor.lat ?? 21.9452
   const baseLon = sensor.lon ?? 88.1234
   const [dLat, dLon] = deterministicOffset(sensor.sensor_id)
@@ -174,4 +174,3 @@ const SensorMarker: React.FC<Props> = ({ sensor }) => {
   )
 }
 
-export default SensorMarker

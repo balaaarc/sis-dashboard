@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import AlertPanel from '../../../components/panels/AlertPanel'
-import { useAlertStore } from '../../../store/alertStore'
-import type { Alert } from '../../../types/sensors'
+import { AlertPanel } from '@/components/panels/AlertPanel'
+import { useAlertStore } from '@/store/alertStore'
+import type { Alert } from '@/types/sensors'
 
 function mockAlert(id: string, level: Alert['threat_level'], acked = false): Alert {
   return {

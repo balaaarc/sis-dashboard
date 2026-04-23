@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSettingsStore } from '../../store/settingsStore'
+import { useSettingsStore } from '@/store/settingsStore'
 
 interface NodeStatus {
   id: string
@@ -16,11 +16,11 @@ interface NodeStatus {
 
 function useNodes() {
   const [nodes, setNodes] = useState<NodeStatus[]>(() => [
-    { id: 'BOP-ALPHA-01', location: 'Sector 1 NW', health: 94, threatLevel: 'CLEAR', sensors: 8, sensorsOnline: 8, alerts: 0, uptime_h: 18, lastContact: Date.now(), status: 'ONLINE' },
-    { id: 'BOP-BETA-01',  location: 'Sector 2 NE', health: 78, threatLevel: 'LOW',   sensors: 7, sensorsOnline: 6, alerts: 2, uptime_h: 14, lastContact: Date.now() - 5000, status: 'DEGRADED' },
-    { id: 'BOP-GAMMA-01', location: 'Sector 3 SE', health: 99, threatLevel: 'CLEAR', sensors: 6, sensorsOnline: 6, alerts: 0, uptime_h: 22, lastContact: Date.now(), status: 'ONLINE' },
-    { id: 'BOP-DELTA-01', location: 'Sector 4 SW', health: 45, threatLevel: 'MEDIUM',sensors: 5, sensorsOnline: 3, alerts: 4, uptime_h: 3,  lastContact: Date.now() - 30000, status: 'DEGRADED' },
-    { id: 'BOP-ECHO-01',  location: 'Sector 5 C',  health: 0,  threatLevel: 'CLEAR', sensors: 4, sensorsOnline: 0, alerts: 0, uptime_h: 0,  lastContact: Date.now() - 180000, status: 'OFFLINE' },
+    { id: 'BOP-ALPHA-01', location: 'Sector 1 NW', health: 94, threatLevel: 'CLEAR',  sensors: 8, sensorsOnline: 8, alerts: 0, uptime_h: 18, lastContact: Date.now(),         status: 'ONLINE' },
+    { id: 'BOP-BETA-01',  location: 'Sector 2 NE', health: 78, threatLevel: 'LOW',    sensors: 7, sensorsOnline: 6, alerts: 2, uptime_h: 14, lastContact: Date.now() - 5000,  status: 'DEGRADED' },
+    { id: 'BOP-GAMMA-01', location: 'Sector 3 SE', health: 99, threatLevel: 'CLEAR',  sensors: 6, sensorsOnline: 6, alerts: 0, uptime_h: 22, lastContact: Date.now(),         status: 'ONLINE' },
+    { id: 'BOP-DELTA-01', location: 'Sector 4 SW', health: 45, threatLevel: 'MEDIUM', sensors: 5, sensorsOnline: 3, alerts: 4, uptime_h: 3,  lastContact: Date.now() - 30000, status: 'DEGRADED' },
+    { id: 'BOP-ECHO-01',  location: 'Sector 5 C',  health: 0,  threatLevel: 'CLEAR',  sensors: 4, sensorsOnline: 0, alerts: 0, uptime_h: 0,  lastContact: Date.now() - 180000,status: 'OFFLINE' },
   ])
 
   useEffect(() => {
@@ -59,28 +59,25 @@ function NodeCard({ node }: { node: NodeStatus }) {
   const age = Math.round((Date.now() - node.lastContact) / 1000)
   return (
     <div
+      className={`bg-bg-secondary rounded-md px-[10px] py-2 ${node.status === 'OFFLINE' ? 'opacity-60' : ''}`}
       style={{
-        background: 'var(--bg-secondary)',
         border: `1px solid ${node.status !== 'ONLINE' ? sc : 'var(--border-color)'}`,
         borderTop: `2px solid ${sc}`,
-        borderRadius: 6,
-        padding: '8px 10px',
-        opacity: node.status === 'OFFLINE' ? 0.6 : 1,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <span style={{ fontSize: 10, fontWeight: 700 }}>{node.id}</span>
-        <span style={{ fontSize: 10, color: sc, fontWeight: 700 }}>{node.status}</span>
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-[10px] font-bold">{node.id}</span>
+        <span className="text-[10px] font-bold" style={{ color: sc }}>{node.status}</span>
       </div>
-      <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 6 }}>{node.location}</div>
+      <div className="text-[10px] text-text-secondary mb-1.5">{node.location}</div>
 
-      <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginBottom: 6 }}>
-        <div style={{ width: `${node.health}%`, height: '100%', background: sc, borderRadius: 2 }} />
+      <div className="h-1 bg-[rgba(255,255,255,0.08)] rounded-[2px] mb-1.5">
+        <div className="h-full rounded-[2px]" style={{ width: `${node.health}%`, background: sc }} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, fontSize: 10, color: 'var(--text-secondary)' }}>
-        <span>Sensors: <strong style={{ color: 'var(--text-primary)' }}>{node.sensorsOnline}/{node.sensors}</strong></span>
-        <span style={{ color: tc, fontWeight: node.threatLevel !== 'CLEAR' ? 700 : 400 }}>
+      <div className="grid grid-cols-2 gap-[3px] text-[10px] text-text-secondary">
+        <span>Sensors: <strong className="text-text-primary">{node.sensorsOnline}/{node.sensors}</strong></span>
+        <span className={node.threatLevel !== 'CLEAR' ? 'font-bold' : ''} style={{ color: tc }}>
           Threat: {node.threatLevel}
         </span>
         <span>Alerts: <strong style={{ color: node.alerts > 0 ? 'var(--alert-medium)' : 'var(--text-primary)' }}>{node.alerts}</strong></span>
@@ -90,7 +87,9 @@ function NodeCard({ node }: { node: NodeStatus }) {
   )
 }
 
-export default function CommandPanel() {
+const textareaClass = 'w-full bg-bg-secondary border border-border-color rounded-md text-text-primary text-[11px] p-2 resize-y font-[inherit] box-border'
+
+export function CommandPanel() {
   const nodes = useNodes()
   const [tab, setTab] = useState<'nodes' | 'incident' | 'handover'>('nodes')
   const [incidentText, setIncidentText] = useState('')
@@ -98,78 +97,60 @@ export default function CommandPanel() {
   const [sortBy, setSortBy] = useState<'status' | 'threat' | 'alerts'>('status')
   const isVisible = useSettingsStore((s) => s.isWidgetVisible)
 
-  const showNodes = isVisible('multiNodeOverview')
+  const showNodes    = isVisible('multiNodeOverview')
   const showIncident = isVisible('incidentReportGenerator')
   const showHandover = isVisible('shiftHandoverSummary')
-  const showCibms = isVisible('cibmsNatgridFeedMonitor')
+  const showCibms    = isVisible('cibmsNatgridFeedMonitor')
 
-  const totalAlerts = nodes.reduce((s, n) => s + n.alerts, 0)
+  const totalAlerts  = nodes.reduce((s, n) => s + n.alerts, 0)
   const offlineCount = nodes.filter((n) => n.status === 'OFFLINE').length
 
   const sorted = [...nodes].sort((a, b) => {
     if (sortBy === 'status') return a.status.localeCompare(b.status)
     if (sortBy === 'threat') {
-      const order = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3, CLEAR: 4 }
+      const order: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3, CLEAR: 4 }
       return (order[a.threatLevel] ?? 5) - (order[b.threatLevel] ?? 5)
     }
     return b.alerts - a.alerts
   })
 
   const TABS = [
-    ...(showNodes ? [{ id: 'nodes', label: '▣ Nodes' }] : []),
+    ...(showNodes    ? [{ id: 'nodes',    label: '▣ Nodes'    }] : []),
     ...(showIncident ? [{ id: 'incident', label: '📋 Incident' }] : []),
     ...(showHandover ? [{ id: 'handover', label: '📝 Handover' }] : []),
   ] as { id: typeof tab; label: string }[]
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Stats bar */}
-      <div
-        style={{
-          padding: '4px 10px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          flexShrink: 0,
-          fontSize: 10,
-        }}
-      >
-        <span style={{ color: 'var(--text-secondary)' }}>
-          Nodes: <strong style={{ color: 'var(--text-primary)' }}>{nodes.filter((n) => n.status === 'ONLINE').length}/{nodes.length}</strong>
+      <div className="py-1 px-[10px] border-b border-border-color bg-bg-secondary flex items-center gap-[10px] shrink-0 text-[10px]">
+        <span className="text-text-secondary">
+          Nodes: <strong className="text-text-primary">{nodes.filter((n) => n.status === 'ONLINE').length}/{nodes.length}</strong>
         </span>
         {offlineCount > 0 && (
-          <span style={{ color: 'var(--alert-critical)', fontWeight: 700 }}>⚠ {offlineCount} OFFLINE</span>
+          <span className="text-alert-critical font-bold">⚠ {offlineCount} OFFLINE</span>
         )}
         {totalAlerts > 0 && (
-          <span style={{ color: 'var(--alert-medium)', fontWeight: 700 }}>🔔 {totalAlerts} active alerts</span>
+          <span className="text-alert-medium font-bold">🔔 {totalAlerts} active alerts</span>
         )}
         {showCibms && (
-          <span style={{ marginLeft: 'auto', color: 'var(--sensor-acoustic)', fontSize: 9 }}>
-            ● CIBMS LINK ACTIVE
-          </span>
+          <span className="ml-auto text-[9px] text-sensor-acoustic">● CIBMS LINK ACTIVE</span>
         )}
       </div>
 
       {/* Sub-tabs */}
       {TABS.length > 1 && (
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+        <div className="flex border-b border-border-color shrink-0">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              style={{
-                flex: 1,
-                padding: '6px 8px',
-                border: 'none',
-                borderBottom: tab === t.id ? '2px solid var(--accent-blue)' : '2px solid transparent',
-                background: 'transparent',
-                color: tab === t.id ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                fontSize: 10,
-                fontWeight: tab === t.id ? 700 : 400,
-              }}
+              className={[
+                'flex-1 py-1.5 px-2 border-none bg-transparent cursor-pointer text-[10px]',
+                tab === t.id
+                  ? 'border-b-2 border-accent-blue text-accent-blue font-bold'
+                  : 'border-b-2 border-transparent text-text-secondary font-normal',
+              ].join(' ')}
             >
               {t.label}
             </button>
@@ -177,49 +158,44 @@ export default function CommandPanel() {
         </div>
       )}
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Nodes tab */}
         {(tab === 'nodes' || TABS.length === 0) && showNodes && (
-          <div style={{ padding: 10 }}>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 8, fontSize: 10 }}>
-              <span style={{ color: 'var(--text-secondary)', lineHeight: '24px' }}>Sort:</span>
+          <div className="p-[10px]">
+            <div className="flex gap-1.5 mb-2 text-[10px]">
+              <span className="text-text-secondary leading-6">Sort:</span>
               {(['status', 'threat', 'alerts'] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setSortBy(s)}
-                  style={{
-                    padding: '2px 8px',
-                    background: sortBy === s ? 'var(--accent-blue)' : 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 4,
-                    color: sortBy === s ? '#fff' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 10,
-                  }}
+                  className={[
+                    'py-[2px] px-2 border border-border-color rounded cursor-pointer text-[10px]',
+                    sortBy === s ? 'bg-accent-blue text-white' : 'bg-bg-tertiary text-text-secondary',
+                  ].join(' ')}
                 >
                   {s}
                 </button>
               ))}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            <div className="grid grid-cols-2 gap-1.5">
               {sorted.map((node) => <NodeCard key={node.id} node={node} />)}
             </div>
 
             {/* CIBMS status */}
             {showCibms && (
-              <div style={{ marginTop: 10, background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '8px 10px', fontSize: 10 }}>
-                <div style={{ fontWeight: 700, marginBottom: 6 }}>🔗 CIBMS / NATGRID Feed</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, color: 'var(--text-secondary)' }}>
-                  <span>Queue depth: <strong style={{ color: 'var(--text-primary)' }}>3 msgs</strong></span>
-                  <span>Last push: <strong style={{ color: 'var(--sensor-acoustic)' }}>2s ago</strong></span>
-                  <span>Errors (24h): <strong style={{ color: 'var(--text-primary)' }}>0</strong></span>
-                  <span>Schema: <strong style={{ color: 'var(--sensor-acoustic)' }}>COMPLIANT</strong></span>
+              <div className="mt-[10px] bg-bg-secondary border border-border-color rounded-md px-[10px] py-2 text-[10px]">
+                <div className="font-bold mb-1.5">🔗 CIBMS / NATGRID Feed</div>
+                <div className="grid grid-cols-2 gap-1 text-text-secondary">
+                  <span>Queue depth: <strong className="text-text-primary">3 msgs</strong></span>
+                  <span>Last push: <strong className="text-sensor-acoustic">2s ago</strong></span>
+                  <span>Errors (24h): <strong className="text-text-primary">0</strong></span>
+                  <span>Schema: <strong className="text-sensor-acoustic">COMPLIANT</strong></span>
                 </div>
-                <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                  <button style={{ padding: '3px 8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 9 }}>
+                <div className="flex gap-1.5 mt-1.5">
+                  <button className="py-[3px] px-2 bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[9px]">
                     ↺ Resync
                   </button>
-                  <span style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: '20px' }}>STANAG 4607/4609</span>
+                  <span className="text-[10px] text-text-secondary leading-5">STANAG 4607/4609</span>
                 </div>
               </div>
             )}
@@ -228,12 +204,12 @@ export default function CommandPanel() {
 
         {/* Incident Report tab */}
         {tab === 'incident' && showIncident && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               Incident Report Generator
             </div>
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6, padding: 10, marginBottom: 8, fontSize: 10, color: 'var(--text-secondary)' }}>
-              <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>Auto-populated from live data</div>
+            <div className="bg-bg-secondary border border-border-color rounded-md p-[10px] mb-2 text-[10px] text-text-secondary">
+              <div className="font-bold text-text-primary mb-1.5">Auto-populated from live data</div>
               <div>Date/Time: {new Date().toLocaleString()}</div>
               <div>Node: BOP-ALPHA-01 | Operator: —</div>
               <div>Active alerts: {totalAlerts} | Nodes online: {nodes.filter((n) => n.status === 'ONLINE').length}/{nodes.length}</div>
@@ -243,25 +219,13 @@ export default function CommandPanel() {
               value={incidentText}
               onChange={(e) => setIncidentText(e.target.value)}
               placeholder="Add narrative description of the incident..."
-              style={{
-                width: '100%',
-                height: 100,
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 6,
-                color: 'var(--text-primary)',
-                fontSize: 11,
-                padding: 8,
-                resize: 'vertical',
-                fontFamily: 'inherit',
-                boxSizing: 'border-box',
-              }}
+              className={`${textareaClass} h-[100px]`}
             />
-            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-              <button style={{ flex: 1, padding: '6px', background: 'var(--accent-blue)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 10, fontWeight: 700 }}>
+            <div className="flex gap-1.5 mt-2">
+              <button className="flex-1 py-1.5 bg-accent-blue border-none rounded text-white cursor-pointer text-[10px] font-bold">
                 ⬇ Export PDF → BHQN
               </button>
-              <button style={{ padding: '6px 10px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 10 }}>
+              <button className="py-1.5 px-[10px] bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]">
                 📎 Attach Snapshot
               </button>
             </div>
@@ -270,30 +234,25 @@ export default function CommandPanel() {
 
         {/* Shift Handover tab */}
         {tab === 'handover' && showHandover && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               Shift Handover Summary
             </div>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+            <div className="flex gap-1.5 mb-[10px]">
               {(['8h', '12h', '24h'] as const).map((r) => (
                 <button
                   key={r}
-                  style={{
-                    padding: '3px 10px',
-                    background: r === '12h' ? 'var(--accent-blue)' : 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 4,
-                    color: r === '12h' ? '#fff' : 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 10,
-                  }}
+                  className={[
+                    'py-[3px] px-[10px] border border-border-color rounded cursor-pointer text-[10px]',
+                    r === '12h' ? 'bg-accent-blue text-white' : 'bg-bg-tertiary text-text-secondary',
+                  ].join(' ')}
                 >
                   Last {r}
                 </button>
               ))}
             </div>
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 6, padding: 10, marginBottom: 8, fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-              <div style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Period Summary (Last 12h)</div>
+            <div className="bg-bg-secondary border border-border-color rounded-md p-[10px] mb-2 text-[10px] text-text-secondary leading-[1.7]">
+              <div className="font-bold text-text-primary mb-1">Period Summary (Last 12h)</div>
               <div>• Total alerts: {totalAlerts + 12} (8 acknowledged, {totalAlerts + 4} pending)</div>
               <div>• Sensor faults: 2 (BOP-BETA-01: ACOUSTIC S04, BOP-DELTA-01: RADAR S12)</div>
               <div>• Tracks detected: 7 (5 ANIMAL, 1 HUMAN, 1 UNKNOWN)</div>
@@ -304,23 +263,11 @@ export default function CommandPanel() {
               value={handoverNotes}
               onChange={(e) => setHandoverNotes(e.target.value)}
               placeholder="Key incidents and handover notes for next shift..."
-              style={{
-                width: '100%',
-                height: 80,
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 6,
-                color: 'var(--text-primary)',
-                fontSize: 11,
-                padding: 8,
-                resize: 'vertical',
-                fontFamily: 'inherit',
-                boxSizing: 'border-box',
-              }}
+              className={`${textareaClass} h-[80px]`}
             />
-            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-              <button style={{ flex: 1, padding: '6px', background: 'var(--accent-blue)', border: 'none', borderRadius: 4, color: '#fff', cursor: 'pointer', fontSize: 10, fontWeight: 700 }}>
-                ✍ Sign & Export PDF
+            <div className="flex gap-1.5 mt-2">
+              <button className="flex-1 py-1.5 bg-accent-blue border-none rounded text-white cursor-pointer text-[10px] font-bold">
+                ✍ Sign &amp; Export PDF
               </button>
             </div>
           </div>

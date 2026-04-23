@@ -3,8 +3,8 @@
 // Animated PPI radar scope showing tracks
 // ============================================================
 
-import React, { useEffect, useRef } from 'react'
-import type { Track } from '../../types/sensors'
+import { useEffect, useRef } from 'react'
+import type { Track } from '@/types/sensors'
 
 interface RadarScopeProps {
   tracks: Track[]
@@ -30,7 +30,7 @@ function trackToXY(track: Track, cx: number, cy: number, r: number, maxRange: nu
   return [x, y]
 }
 
-export default function RadarScope({ tracks, maxRange = 1000, size = 260 }: RadarScopeProps) {
+export function RadarScope({ tracks, maxRange = 1000, size = 260 }: RadarScopeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const sweepAngleRef = useRef(0)
   const animRef = useRef<number>()
@@ -178,14 +178,14 @@ export default function RadarScope({ tracks, maxRange = 1000, size = 260 }: Rada
 
   return (
     <div
-      className="radar-container"
-      style={{ width: size, height: size, flexShrink: 0 }}
+      className="radar-container shrink-0"
+      style={{ width: size, height: size }}
     >
       <canvas
         ref={canvasRef}
         width={size}
         height={size}
-        style={{ borderRadius: '50%', display: 'block' }}
+        className="rounded-full block"
       />
     </div>
   )

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSettingsStore } from '../../store/settingsStore'
+import { useSettingsStore } from '@/store/settingsStore'
 
 interface DroneContact {
   id: string
@@ -19,7 +19,6 @@ function useDroneContacts() {
   const [contacts, setContacts] = useState<DroneContact[]>([])
 
   useEffect(() => {
-    const DRONES = ['DJI-Phantom', 'Mavic-3', 'Unknown-RF', 'Autel-EVO', 'Parrot-Anafi']
     const RF_SIGS = ['2.4 GHz burst', '5.8 GHz FHSS', '900 MHz LR', '433 MHz OOK', 'Encrypted link']
 
     function nextContact(): DroneContact {
@@ -72,7 +71,7 @@ function BearingIndicator({ bearing, label }: { bearing: number; label: string }
   const x = cx + r * Math.cos(rad)
   const y = cy + r * Math.sin(rad)
   return (
-    <svg width={size} height={size} style={{ display: 'block' }}>
+    <svg width={size} height={size} className="block">
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={1} />
       <circle cx={cx} cy={cy} r={2} fill="var(--accent-blue)" />
       {[0, 90, 180, 270].map((a) => {
@@ -104,13 +103,13 @@ function RFBar({ value, max = 100 }: { value: number; max?: number }) {
   const pct = Math.min((value / max) * 100, 100)
   const color = pct > 70 ? 'var(--alert-critical)' : pct > 40 ? 'var(--alert-medium)' : 'var(--sensor-acoustic)'
   return (
-    <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-      <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 2 }} />
+    <div className="h-1 bg-[rgba(255,255,255,0.1)] rounded-sm overflow-hidden">
+      <div style={{ width: `${pct}%`, background: color }} className="h-full rounded-sm" />
     </div>
   )
 }
 
-export default function CounterUASPanel() {
+export function CounterUASPanel() {
   const contacts = useDroneContacts()
   const [alarmActive, setAlarmActive] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -127,106 +126,56 @@ export default function CounterUASPanel() {
   }, [contacts])
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <div
-        style={{
-          padding: '4px 10px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          flexShrink: 0,
-          fontSize: 10,
-        }}
-      >
+      <div className="px-[10px] py-1 border-b border-border-color bg-bg-secondary flex items-center gap-[10px] shrink-0 text-[10px]">
         <span
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            color: contacts.length > 0 ? 'var(--alert-critical)' : 'var(--sensor-acoustic)',
-            fontWeight: 700,
-          }}
+          className="flex items-center gap-1 font-bold"
+          style={{ color: contacts.length > 0 ? 'var(--alert-critical)' : 'var(--sensor-acoustic)' }}
         >
           <span
+            className="w-1.5 h-1.5 rounded-full"
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
               background: contacts.length > 0 ? 'var(--alert-critical)' : 'var(--sensor-acoustic)',
               animation: contacts.length > 0 ? 'pulse 1s infinite' : 'none',
             }}
           />
           {contacts.length} UAS Contact{contacts.length !== 1 ? 's' : ''}
         </span>
-        <span style={{ flex: 1 }} />
+        <span className="flex-1" />
         <button
           onClick={() => setAlarmActive((a) => !a)}
+          className="px-2 py-0.5 rounded cursor-pointer text-[10px] font-semibold"
           style={{
-            padding: '2px 8px',
             background: alarmActive ? 'rgba(239,68,68,0.2)' : 'var(--bg-tertiary)',
             border: `1px solid ${alarmActive ? 'var(--alert-critical)' : 'var(--border-color)'}`,
-            borderRadius: 4,
             color: alarmActive ? 'var(--alert-critical)' : 'var(--text-secondary)',
-            cursor: 'pointer',
-            fontSize: 10,
-            fontWeight: 600,
           }}
         >
           {alarmActive ? '🔔 ALARM ON' : '🔕 Alarm Off'}
         </button>
         <button
-          style={{
-            padding: '2px 8px',
-            background: 'rgba(239,68,68,0.15)',
-            border: '1px solid rgba(239,68,68,0.4)',
-            borderRadius: 4,
-            color: 'var(--alert-critical)',
-            cursor: 'pointer',
-            fontSize: 10,
-            fontWeight: 700,
-          }}
+          className="px-2 py-0.5 bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.4)] rounded text-alert-critical cursor-pointer text-[10px] font-bold"
         >
           ⚡ Notify QRT
         </button>
       </div>
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Counter-UAS Threat Display */}
         {showThreatDisplay && (
-          <div style={{ padding: 10 }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                color: 'var(--text-secondary)',
-                textTransform: 'uppercase',
-                marginBottom: 8,
-              }}
-            >
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               🛸 Active UAS Contacts
             </div>
 
             {contacts.length === 0 ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '24px 12px',
-                  color: 'var(--text-secondary)',
-                  fontSize: 11,
-                  background: 'var(--bg-secondary)',
-                  borderRadius: 6,
-                  border: '1px solid var(--border-color)',
-                }}
-              >
-                <div style={{ fontSize: 24, marginBottom: 6 }}>✅</div>
+              <div className="text-center px-3 py-6 text-text-secondary text-[11px] bg-bg-secondary rounded-md border border-border-color">
+                <div className="text-2xl mb-1.5">✅</div>
                 No UAS contacts detected
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="flex flex-col gap-1.5">
                 {contacts.map((c) => {
                   const clrColor = CLASS_COLOR[c.classification]
                   const age = Math.round((Date.now() - c.firstSeen) / 1000)
@@ -234,90 +183,65 @@ export default function CounterUASPanel() {
                     <div
                       key={c.id}
                       onClick={() => setSelectedId(selectedId === c.id ? null : c.id)}
+                      className="bg-bg-secondary rounded-md px-[10px] py-2 cursor-pointer"
                       style={{
-                        background: 'var(--bg-secondary)',
                         border: `1px solid ${selectedId === c.id ? clrColor : 'var(--border-color)'}`,
                         borderLeft: `3px solid ${clrColor}`,
-                        borderRadius: 6,
-                        padding: '8px 10px',
-                        cursor: 'pointer',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: clrColor }}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[10px] font-bold" style={{ color: clrColor }}>
                           UAS-{c.id}
                         </span>
                         <span
+                          className="text-[10px] rounded-[3px] px-[5px] font-bold"
                           style={{
-                            fontSize: 10,
                             background: `${clrColor}22`,
                             color: clrColor,
                             border: `1px solid ${clrColor}55`,
-                            borderRadius: 3,
-                            padding: '0 5px',
-                            fontWeight: 700,
                           }}
                         >
                           {c.classification}
                         </span>
-                        <span style={{ fontSize: 10, color: 'var(--text-secondary)', marginLeft: 'auto' }}>
+                        <span className="text-[10px] text-text-secondary ml-auto">
                           {c.confidence}% conf · {age}s
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', gap: 12, fontSize: 10, marginBottom: 6 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <div className="flex gap-3 text-[10px] mb-1.5">
+                        <div className="flex flex-col items-center gap-1">
                           <BearingIndicator bearing={c.bearing_deg} label={`${c.bearing_deg}°`} />
                         </div>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, justifyContent: 'center' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                            <span>Range</span><strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{c.range_m} m</strong>
+                        <div className="flex-1 flex flex-col gap-1 justify-center">
+                          <div className="flex justify-between text-text-secondary">
+                            <span>Range</span><strong className="text-text-primary font-mono">{c.range_m} m</strong>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                            <span>Altitude</span><strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{c.altitude_m} m</strong>
+                          <div className="flex justify-between text-text-secondary">
+                            <span>Altitude</span><strong className="text-text-primary font-mono">{c.altitude_m} m</strong>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                            <span>Elevation</span><strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{c.elevation_deg}°</strong>
+                          <div className="flex justify-between text-text-secondary">
+                            <span>Elevation</span><strong className="text-text-primary font-mono">{c.elevation_deg}°</strong>
                           </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)' }}>
-                            <span>Speed</span><strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{c.velocity_ms} m/s</strong>
+                          <div className="flex justify-between text-text-secondary">
+                            <span>Speed</span><strong className="text-text-primary font-mono">{c.velocity_ms} m/s</strong>
                           </div>
                         </div>
                       </div>
 
-                      <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                      <div className="text-[10px] text-text-secondary mb-1">
                         RF: {c.rfSignature}
                       </div>
                       <RFBar value={c.confidence} />
 
                       {selectedId === c.id && (
-                        <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+                        <div className="mt-2 flex gap-1.5">
                           <button
-                            style={{
-                              flex: 1,
-                              padding: '4px 6px',
-                              background: 'rgba(239,68,68,0.15)',
-                              border: '1px solid rgba(239,68,68,0.4)',
-                              borderRadius: 4,
-                              color: 'var(--alert-critical)',
-                              cursor: 'pointer',
-                              fontSize: 10,
-                              fontWeight: 600,
-                            }}
+                            className="flex-1 py-1 px-1.5 bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.4)] rounded text-alert-critical cursor-pointer text-[10px] font-semibold"
                           >
                             ⚡ Engage QRT
                           </button>
                           <button
-                            style={{
-                              flex: 1,
-                              padding: '4px 6px',
-                              background: 'var(--bg-tertiary)',
-                              border: '1px solid var(--border-color)',
-                              borderRadius: 4,
-                              color: 'var(--text-secondary)',
-                              cursor: 'pointer',
-                              fontSize: 10,
-                            }}
+                            className="flex-1 py-1 px-1.5 bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]"
                           >
                             📝 Log Engagement
                           </button>
@@ -333,63 +257,37 @@ export default function CounterUASPanel() {
 
         {/* Drone Track Playback */}
         {showPlayback && (
-          <div style={{ padding: '0 10px 10px' }}>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                color: 'var(--text-secondary)',
-                textTransform: 'uppercase',
-                marginBottom: 8,
-              }}
-            >
+          <div className="px-[10px] pb-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               📼 Track History ({historyRef.current.length} points)
             </div>
-            <div
-              style={{
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 6,
-                padding: 10,
-                fontSize: 10,
-              }}
-            >
-              <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+            <div className="bg-bg-secondary border border-border-color rounded-md p-[10px] text-[10px]">
+              <div className="flex gap-2 mb-2 flex-wrap">
                 {(['1×', '2×', '4×'] as const).map((speed) => (
                   <button
                     key={speed}
+                    className="px-2 py-0.5 border border-border-color rounded cursor-pointer text-[10px]"
                     style={{
-                      padding: '2px 8px',
                       background: speed === '1×' ? 'var(--accent-blue)' : 'var(--bg-tertiary)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: 4,
                       color: speed === '1×' ? '#fff' : 'var(--text-secondary)',
-                      cursor: 'pointer',
-                      fontSize: 10,
                     }}
                   >
                     {speed}
                   </button>
                 ))}
                 <button
-                  style={{
-                    padding: '2px 8px',
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 4,
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 10,
-                  }}
+                  className="px-2 py-0.5 bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]"
                 >
                   ⬇ Export KML
                 </button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3, maxHeight: 100, overflowY: 'auto' }}>
+              <div className="flex flex-col gap-[3px] max-h-[100px] overflow-y-auto">
                 {historyRef.current.slice(-8).reverse().map((p, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-secondary)', padding: '2px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                    <span style={{ fontFamily: 'monospace', color: 'var(--alert-medium)' }}>{p.id}</span>
+                  <div
+                    key={i}
+                    className="flex justify-between text-text-secondary py-0.5 border-b border-[rgba(255,255,255,0.04)]"
+                  >
+                    <span className="font-mono text-alert-medium">{p.id}</span>
                     <span>{p.bearing.toFixed(0)}° bearing</span>
                     <span>{new Date(p.ts).toLocaleTimeString()}</span>
                   </div>

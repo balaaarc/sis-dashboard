@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import ConnectionBadge from '../../../components/widgets/ConnectionBadge'
-import { useSystemStore } from '../../../store/systemStore'
+import { ConnectionBadge } from '@/components/widgets/ConnectionBadge'
+import { useSystemStore } from '@/store/systemStore'
 
 const defaultSystemState = {
   connectionStatus: 'connected' as const,

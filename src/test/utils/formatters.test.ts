@@ -6,7 +6,7 @@ import {
   getThreatLevelColor,
   getSensorFamilyColor,
   formatCoords,
-} from '../../utils/formatters'
+} from '@/utils/formatters'
 
 // ---------------------------------------------------------------------------
 // formatTimestamp

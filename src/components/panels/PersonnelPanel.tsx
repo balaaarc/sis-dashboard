@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useSettingsStore } from '../../store/settingsStore'
+import { useSettingsStore } from '@/store/settingsStore'
 
 interface Personnel {
   id: string
@@ -46,7 +46,7 @@ const BASE_LON = 88.12
 function usePersonnel() {
   const [personnel, setPersonnel] = useState<Personnel[]>(() =>
     PATROL_NAMES.map((p, i) => ({
-      id: `P${String(i + 1).padStart(2, '0')}`,
+      id: `P${String(i + 1).padStart(2, '00')}`,
       name: p.name,
       role: p.role,
       lat: BASE_LAT + (Math.random() - 0.5) * 0.04,
@@ -153,7 +153,8 @@ function MiniMap({ personnel }: { personnel: Personnel[] }) {
     <svg
       width={size}
       height={size}
-      style={{ background: 'rgba(15,23,42,0.6)', borderRadius: 6, border: '1px solid var(--border-color)', display: 'block' }}
+      className="block rounded-md border border-border-color shrink-0"
+      style={{ background: 'rgba(15,23,42,0.6)' }}
     >
       {/* Grid */}
       {[0.25, 0.5, 0.75].map((f) => (
@@ -183,7 +184,7 @@ function MiniMap({ personnel }: { personnel: Personnel[] }) {
   )
 }
 
-export default function PersonnelPanel() {
+export function PersonnelPanel() {
   const personnel = usePersonnel()
   const gprEvents = useGPREvents()
   const madReadings = useMAD()
@@ -206,47 +207,24 @@ export default function PersonnelPanel() {
   ] as { id: typeof tab; label: string }[]
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Stats bar */}
-      <div
-        style={{
-          padding: '4px 10px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          flexShrink: 0,
-          fontSize: 10,
-        }}
-      >
-        <span style={{ color: 'var(--text-secondary)' }}>
-          Personnel: <strong style={{ color: 'var(--text-primary)' }}>{personnel.length}</strong>
+      <div className="px-[10px] py-1 border-b border-border-color bg-bg-secondary flex items-center gap-[10px] shrink-0 text-[10px]">
+        <span className="text-text-secondary">
+          Personnel: <strong className="text-text-primary">{personnel.length}</strong>
         </span>
         {missedCount > 0 && (
-          <span style={{ color: 'var(--alert-high)', fontWeight: 700 }}>
+          <span className="text-alert-high font-bold">
             ⚠ {missedCount} missed check-in
           </span>
         )}
         {outsideCount > 0 && (
-          <span style={{ color: 'var(--alert-medium)', fontWeight: 700 }}>
+          <span className="text-alert-medium font-bold">
             ⚡ {outsideCount} outside fence
           </span>
         )}
         {showEmergency && (
-          <button
-            style={{
-              marginLeft: 'auto',
-              padding: '2px 8px',
-              background: 'rgba(239,68,68,0.2)',
-              border: '1px solid rgba(239,68,68,0.5)',
-              borderRadius: 4,
-              color: 'var(--alert-critical)',
-              cursor: 'pointer',
-              fontSize: 10,
-              fontWeight: 700,
-            }}
-          >
+          <button className="ml-auto px-2 py-0.5 bg-[rgba(239,68,68,0.2)] border border-[rgba(239,68,68,0.5)] rounded text-alert-critical cursor-pointer text-[10px] font-bold">
             🚨 Emergency Broadcast
           </button>
         )}
@@ -254,22 +232,17 @@ export default function PersonnelPanel() {
 
       {/* Sub-tabs */}
       {TABS.length > 1 && (
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+        <div className="flex border-b border-border-color shrink-0">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              style={{
-                padding: '6px 12px',
-                border: 'none',
-                borderBottom: tab === t.id ? '2px solid var(--accent-blue)' : '2px solid transparent',
-                background: 'transparent',
-                color: tab === t.id ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                cursor: 'pointer',
-                fontSize: 10,
-                fontWeight: tab === t.id ? 700 : 400,
-                whiteSpace: 'nowrap',
-              }}
+              className={[
+                'px-3 py-1.5 border-0 bg-transparent cursor-pointer text-[10px] whitespace-nowrap',
+                tab === t.id
+                  ? 'border-b-2 border-accent-blue text-accent-blue font-bold'
+                  : 'border-b-2 border-transparent text-text-secondary font-normal',
+              ].join(' ')}
             >
               {t.label}
             </button>
@@ -277,36 +250,31 @@ export default function PersonnelPanel() {
         </div>
       )}
 
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Personnel / NavIC tab */}
         {(tab === 'personnel' || TABS.length === 0) && (showNavic || showPersonnel) && (
-          <div style={{ padding: 10 }}>
-            <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+          <div className="p-[10px]">
+            <div className="flex gap-[10px] mb-[10px]">
               <MiniMap personnel={personnel} />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div className="flex-1 flex flex-col gap-1">
                 {personnel.map((p) => {
                   const age = Math.round((Date.now() - p.lastCheckIn) / 1000)
                   const color = p.status === 'EMERGENCY' ? 'var(--alert-critical)' : p.status === 'MISSED_CHECKIN' ? 'var(--alert-high)' : 'var(--sensor-acoustic)'
                   return (
                     <div
                       key={p.id}
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: `1px solid ${p.status !== 'ACTIVE' ? color : 'var(--border-color)'}`,
-                        borderRadius: 4,
-                        padding: '5px 8px',
-                        fontSize: 10,
-                      }}
+                      className="bg-bg-secondary rounded p-[5px_8px] text-[10px]"
+                      style={{ border: `1px solid ${p.status !== 'ACTIVE' ? color : 'var(--border-color)'}` }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 700, color }}>{p.id}: {p.name}</span>
-                        <span style={{ color: 'var(--text-secondary)', fontSize: 9 }}>{p.role}</span>
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold" style={{ color }}>{p.id}: {p.name}</span>
+                        <span className="text-text-secondary text-[9px]">{p.role}</span>
                       </div>
-                      <div style={{ display: 'flex', gap: 8, color: 'var(--text-secondary)', marginTop: 2 }}>
+                      <div className="flex gap-2 text-text-secondary mt-0.5">
                         <span>CEP: {p.cep_m}m</span>
                         <span>🔋 {p.battery.toFixed(0)}%</span>
                         <span>Check-in: {age < 60 ? `${age}s` : `${Math.floor(age / 60)}m`} ago</span>
-                        {p.geofence === 'OUTSIDE' && <span style={{ color: 'var(--alert-medium)', fontWeight: 700 }}>⚡ OOB</span>}
+                        {p.geofence === 'OUTSIDE' && <span className="text-alert-medium font-bold">⚡ OOB</span>}
                       </div>
                     </div>
                   )
@@ -318,29 +286,33 @@ export default function PersonnelPanel() {
 
         {/* GPR tab */}
         {tab === 'gpr' && showGPR && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               Ground Penetrating Radar — B-Scan Anomalies
             </div>
             {gprEvents.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)', fontSize: 11 }}>
+              <div className="text-center p-6 text-text-secondary text-[11px]">
                 No GPR anomalies detected
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="flex flex-col gap-1.5">
                 {gprEvents.map((ev) => {
                   const isCritical = ev.anomalyType.includes('Tunnel') || ev.anomalyType.includes('Metallic')
                   const color = isCritical ? 'var(--alert-critical)' : 'var(--alert-medium)'
                   return (
-                    <div key={ev.id} style={{ background: 'var(--bg-secondary)', border: `1px solid var(--border-color)`, borderLeft: `3px solid ${color}`, borderRadius: 4, padding: '7px 10px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 3 }}>
-                        <span style={{ fontWeight: 700, color }}>{ev.anomalyType}</span>
-                        <span style={{ color: 'var(--text-secondary)' }}>{new Date(ev.timestamp).toLocaleTimeString()}</span>
+                    <div
+                      key={ev.id}
+                      className="bg-bg-secondary border border-border-color rounded p-[7px_10px]"
+                      style={{ borderLeft: `3px solid ${color}` }}
+                    >
+                      <div className="flex justify-between text-[10px] mb-[3px]">
+                        <span className="font-bold" style={{ color }}>{ev.anomalyType}</span>
+                        <span className="text-text-secondary">{new Date(ev.timestamp).toLocaleTimeString()}</span>
                       </div>
-                      <div style={{ display: 'flex', gap: 12, fontSize: 10, color: 'var(--text-secondary)' }}>
-                        <span>Depth: <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{ev.depth_m} m</strong></span>
-                        <span>Conf: <strong style={{ color: 'var(--text-primary)' }}>{ev.confidence}%</strong></span>
-                        <span style={{ fontFamily: 'monospace', fontSize: 9 }}>{ev.lat.toFixed(4)}N {ev.lon.toFixed(4)}E</span>
+                      <div className="flex gap-3 text-[10px] text-text-secondary">
+                        <span>Depth: <strong className="text-text-primary font-mono">{ev.depth_m} m</strong></span>
+                        <span>Conf: <strong className="text-text-primary">{ev.confidence}%</strong></span>
+                        <span className="font-mono text-[9px]">{ev.lat.toFixed(4)}N {ev.lon.toFixed(4)}E</span>
                       </div>
                     </div>
                   )
@@ -352,25 +324,36 @@ export default function PersonnelPanel() {
 
         {/* MAD tab */}
         {tab === 'mad' && showMAD && (
-          <div style={{ padding: 10 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div className="p-[10px]">
+            <div className="text-[10px] font-bold tracking-[0.1em] text-text-secondary uppercase mb-2">
               Magnetic Anomaly Detection — Field Distortion
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="flex flex-col gap-1.5">
               {madReadings.map((r) => {
                 const pct = Math.min((r.fieldDelta_nT / 500) * 100, 100)
                 const color = r.alert ? 'var(--alert-critical)' : r.fieldDelta_nT > 100 ? 'var(--alert-medium)' : 'var(--sensor-acoustic)'
                 return (
-                  <div key={r.sensorId} style={{ background: 'var(--bg-secondary)', border: `1px solid ${r.alert ? 'var(--alert-critical)' : 'var(--border-color)'}`, borderRadius: 6, padding: '8px 10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 6 }}>
-                      <span style={{ fontWeight: 700 }}>{r.sensorId}</span>
-                      {r.alert && <span style={{ color: 'var(--alert-critical)', fontWeight: 700, fontSize: 9 }}>⚠ ANOMALY</span>}
-                      <span style={{ fontFamily: 'monospace', color }}>Δ{r.fieldDelta_nT.toFixed(0)} nT</span>
+                  <div
+                    key={r.sensorId}
+                    className="bg-bg-secondary rounded-md p-[8px_10px]"
+                    style={{ border: `1px solid ${r.alert ? 'var(--alert-critical)' : 'var(--border-color)'}` }}
+                  >
+                    <div className="flex justify-between text-[10px] mb-1.5">
+                      <span className="font-bold">{r.sensorId}</span>
+                      {r.alert && <span className="text-alert-critical font-bold text-[9px]">⚠ ANOMALY</span>}
+                      <span className="font-mono" style={{ color }}>Δ{r.fieldDelta_nT.toFixed(0)} nT</span>
                     </div>
-                    <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', marginBottom: 4 }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.5s', boxShadow: r.alert ? `0 0 8px ${color}` : 'none' }} />
+                    <div className="h-1.5 bg-[rgba(255,255,255,0.08)] rounded-[3px] overflow-hidden mb-1">
+                      <div
+                        className="h-full rounded-[3px] transition-[width] duration-500"
+                        style={{
+                          width: `${pct}%`,
+                          background: color,
+                          boxShadow: r.alert ? `0 0 8px ${color}` : 'none',
+                        }}
+                      />
                     </div>
-                    <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+                    <div className="text-[10px] text-text-secondary">
                       Est. metal mass: {r.metalMassKg.toFixed(2)} kg equiv · Threshold: 200 nT
                     </div>
                   </div>

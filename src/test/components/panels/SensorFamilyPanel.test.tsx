@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SensorFamilyPanel from '../../../components/panels/SensorFamilyPanel'
-import { useSensorStore } from '../../../store/sensorStore'
-import type { SensorPayload } from '../../../types/sensors'
+import { SensorFamilyPanel } from '@/components/panels/SensorFamilyPanel'
+import { useSensorStore } from '@/store/sensorStore'
+import type { SensorPayload } from '@/types/sensors'
 
 function makeSensor(id: string, modality: SensorPayload['modality']): SensorPayload {
   return {

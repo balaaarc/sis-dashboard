@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SensorMarker from '../../../components/map/SensorMarker'
-import type { SensorPayload } from '../../../types/sensors'
+import { SensorMarker } from '@/components/map/SensorMarker'
+import type { SensorPayload } from '@/types/sensors'
 
 function makeSensor(overrides: Partial<SensorPayload> = {}): SensorPayload {
   return {

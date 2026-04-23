@@ -1,6 +1,6 @@
-import { useSensorStore } from '../../store/sensorStore'
-import { formatQualityScore } from '../../utils/formatters'
-import type { SensorStatus } from '../../types/sensors'
+import { useSensorStore } from '@/store/sensorStore'
+import { formatQualityScore } from '@/utils/formatters'
+import type { SensorStatus } from '@/types/sensors'
 
 function statusColor(status: SensorStatus): string {
   switch (status) {
@@ -22,7 +22,7 @@ function shortName(sensorId: string, modality: string): string {
   return `${modality.slice(0, 4)} ${sensorId.slice(-3)}`
 }
 
-export default function SensorStatusGrid() {
+export function SensorStatusGrid() {
   const sensors = useSensorStore((s) => s.sensors)
   const selectSensor = useSensorStore((s) => s.selectSensor)
   const selectedId = useSensorStore((s) => s.selectedSensorId)
@@ -39,14 +39,7 @@ export default function SensorStatusGrid() {
   }
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 4,
-        padding: 8,
-      }}
-    >
+    <div className="grid grid-cols-4 gap-1 p-2">
       {entries.map((sensor) => {
         const sc = statusColor(sensor.sensor_status)
         const qc = qualityColor(sensor.quality_score)
@@ -56,58 +49,39 @@ export default function SensorStatusGrid() {
           <div
             key={sensor.sensor_id}
             onClick={() => selectSensor(isSelected ? null : sensor.sensor_id)}
+            className="rounded-[6px] px-2 py-1.5 cursor-pointer transition-all duration-150 flex flex-col gap-1"
             style={{
               background: isSelected ? 'var(--bg-tertiary)' : 'var(--bg-primary)',
               border: `1px solid ${isSelected ? 'var(--accent-blue)' : 'var(--border-color)'}`,
-              borderRadius: 6,
-              padding: '6px 8px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
             }}
             title={`${sensor.sensor_id} — ${sensor.sensor_status}`}
           >
             {/* Status dot + name */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div className="flex items-center gap-[5px]">
               <span
+                className="w-[7px] h-[7px] rounded-full shrink-0"
                 style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: '50%',
                   background: sc,
-                  flexShrink: 0,
                   boxShadow: sensor.sensor_status === 'ONLINE' ? `0 0 5px ${sc}` : 'none',
                 }}
               />
-              <span
-                style={{
-                  fontSize: 10,
-                  fontFamily: 'monospace',
-                  color: 'var(--text-secondary)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span className="text-[10px] font-mono text-text-secondary overflow-hidden text-ellipsis whitespace-nowrap">
                 {shortName(sensor.sensor_id, sensor.modality)}
               </span>
             </div>
 
             {/* Quality bar */}
-            <div className="progress-bar-track" style={{ height: 4 }}>
+            <div className="progress-bar-track h-1">
               <div
-                className="progress-bar-fill"
+                className="progress-bar-fill h-full"
                 style={{
                   width: `${sensor.quality_score * 100}%`,
                   background: qc,
-                  height: '100%',
                 }}
               />
             </div>
 
-            <div style={{ fontSize: 10, color: qc, fontWeight: 700, textAlign: 'right' }}>
+            <div data-testid="quality-score" className="text-[10px] font-bold text-right" style={{ color: qc }}>
               {formatQualityScore(sensor.quality_score)}
             </div>
           </div>

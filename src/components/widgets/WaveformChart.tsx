@@ -3,7 +3,7 @@
 // SVG waveform chart for seismic / acoustic sensor data
 // ============================================================
 
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 interface WaveformChartProps {
   data: number[]
@@ -12,7 +12,7 @@ interface WaveformChartProps {
   label?: string
 }
 
-export default function WaveformChart({
+export function WaveformChart({
   data,
   color = 'var(--sensor-seismic)',
   height = 80,
@@ -40,16 +40,8 @@ export default function WaveformChart({
   if (!data || data.length === 0) {
     return (
       <div
-        style={{
-          height: HEIGHT,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(0,0,0,0.2)',
-          borderRadius: 4,
-          fontSize: 11,
-          color: 'var(--text-secondary)',
-        }}
+        className="flex items-center justify-center bg-black/20 rounded text-[11px] text-text-secondary"
+        style={{ height: HEIGHT }}
       >
         No waveform data
       </div>
@@ -62,22 +54,15 @@ export default function WaveformChart({
       style={{ height: HEIGHT + (label ? 18 : 0) }}
     >
       {label && (
-        <div
-          style={{
-            fontSize: 10,
-            color: 'rgba(255,255,255,0.65)',
-            padding: '2px 6px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}
-        >
+        <div className="text-[10px] text-white/[0.65] py-[2px] px-1.5 uppercase tracking-[0.05em]">
           {label}
         </div>
       )}
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         preserveAspectRatio="none"
-        style={{ width: '100%', height: HEIGHT, display: 'block' }}
+        className="w-full block"
+        style={{ height: HEIGHT }}
       >
         {/* Grid lines */}
         {[0.25, 0.5, 0.75].map((f) => (

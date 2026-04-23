@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SensorStatusGrid from '../../../components/widgets/SensorStatusGrid'
-import { useSensorStore } from '../../../store/sensorStore'
-import type { SensorPayload } from '../../../types/sensors'
+import { SensorStatusGrid } from '@/components/widgets/SensorStatusGrid'
+import { useSensorStore } from '@/store/sensorStore'
+import type { SensorPayload } from '@/types/sensors'
 
 function mockSensor(id: string, overrides: Partial<SensorPayload> = {}): SensorPayload {
   return {
@@ -51,7 +51,7 @@ describe('SensorStatusGrid', () => {
     const { container } = render(<SensorStatusGrid />)
     // Grid renders one card per sensor: 3 direct children inside the grid div
     // Check by the formatted short names or count of quality scores rendered
-    const qualityTexts = container.querySelectorAll('[style*="text-align: right"]')
+    const qualityTexts = container.querySelectorAll('[data-testid="quality-score"]')
     expect(qualityTexts.length).toBe(3)
   })
 

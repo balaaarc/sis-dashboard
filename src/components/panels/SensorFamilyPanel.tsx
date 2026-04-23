@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { useSensorStore } from '../../store/sensorStore'
-import { useSettingsStore } from '../../store/settingsStore'
-import { getSensorFamilyColor, formatRelativeTime, formatQualityScore } from '../../utils/formatters'
-import SensorCard from '../widgets/SensorCard'
-import WaveformChart from '../widgets/WaveformChart'
+import { useSensorStore } from '@/store/sensorStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { getSensorFamilyColor, formatQualityScore } from '@/utils/formatters'
+import { SensorCard } from '@/components/widgets/SensorCard'
+import { WaveformChart } from '@/components/widgets/WaveformChart'
 
 // ── Acoustic Spectrogram widget ──
 function AcousticSpectrogram({ sensorId }: { sensorId: string }) {
@@ -41,18 +41,19 @@ function AcousticSpectrogram({ sensorId }: { sensorId: string }) {
   }, [sensorId])
 
   return (
-    <div style={{ padding: '0 12px 8px' }}>
-      <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 4, display: 'flex', justifyContent: 'space-between' }}>
+    <div className="px-3 pb-2">
+      <div className="text-[10px] text-text-secondary mb-1 flex justify-between">
         <span>MFCC Spectrogram — {sensorId}</span><span>0–8 kHz</span>
       </div>
-      <canvas ref={canvasRef} width={240} height={80} style={{ width: '100%', height: 80, borderRadius: 4, display: 'block' }} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>
+      <canvas ref={canvasRef} width={240} height={80} className="w-full h-[80px] rounded block" />
+      <div className="flex justify-between text-[10px] text-text-secondary mt-0.5">
         <span>Past</span><span>Now</span>
       </div>
     </div>
   )
 }
-import type { SensorFamily, SensorModality } from '../../types/sensors'
+
+import type { SensorFamily, SensorModality } from '@/types/sensors'
 
 const FAMILY_MODALITIES: Record<SensorFamily, SensorModality[]> = {
   Seismic: ['SEISMIC', 'VIBRATION', 'FIBRE_OPTIC'],
@@ -64,7 +65,6 @@ const FAMILY_MODALITIES: Record<SensorFamily, SensorModality[]> = {
 }
 
 const ALL_FAMILIES: SensorFamily[] = ['Seismic', 'Acoustic', 'Optical', 'Radar', 'Magnetic', 'Chemical']
-
 const SKIP_WAVEFORM_KEYS = new Set(['frame_width', 'frame_height'])
 
 function getSensorFamily(modality: SensorModality): SensorFamily | null {
@@ -74,7 +74,7 @@ function getSensorFamily(modality: SensorModality): SensorFamily | null {
   return null
 }
 
-export default function SensorFamilyPanel() {
+export function SensorFamilyPanel() {
   const [activeFamily, setActiveFamily] = useState<SensorFamily>('Seismic')
   const isVisible = useSettingsStore((s) => s.isWidgetVisible)
   const sensors = useSensorStore((s) => s.sensors)
@@ -87,13 +87,11 @@ export default function SensorFamilyPanel() {
     )
   }, [sensors, activeFamily])
 
-  // Build waveform data from selected or first sensor history
   const waveformSensorId = selectedId ?? familySensors[0]?.sensor_id
   const waveformHistory = waveformSensorId ? (sensorHistory.get(waveformSensorId) ?? []) : []
   const waveformData = useMemo(() => {
     return waveformHistory.map((p) => {
       const raw = p.raw_value
-      // Optical sensors: chart detection count for meaningful variation
       if (Array.isArray(raw.detections)) {
         return (raw.detections as unknown[]).length
       }
@@ -106,8 +104,6 @@ export default function SensorFamilyPanel() {
   }, [waveformHistory])
 
   const familyColor = getSensorFamilyColor(activeFamily)
-
-  // Family stats
   const onlineCount = familySensors.filter((s) => s.sensor_status === 'ONLINE').length
   const avgQuality =
     familySensors.length > 0
@@ -115,35 +111,18 @@ export default function SensorFamilyPanel() {
       : 0
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <span className="sr-only">Sensor Families</span>
       {/* Stats bar */}
-      <div
-        style={{
-          padding: '4px 12px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          flexShrink: 0,
-          gap: 12,
-        }}
-      >
+      <div className="py-1 px-3 border-b border-border-color bg-bg-secondary flex items-center justify-end shrink-0 gap-3">
         <span
-          style={{
-            width: 7,
-            height: 7,
-            borderRadius: '50%',
-            background: familyColor,
-            display: 'inline-block',
-            boxShadow: `0 0 5px ${familyColor}`,
-          }}
+          className="w-[7px] h-[7px] rounded-full inline-block"
+          style={{ background: familyColor, boxShadow: `0 0 5px ${familyColor}` }}
         />
-        <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-secondary)' }}>
+        <div className="flex gap-2 text-[10px] text-text-secondary">
           <span>
             Online:{' '}
-            <strong style={{ color: 'var(--sensor-acoustic)' }}>{onlineCount}</strong>/
-            {familySensors.length}
+            <strong className="text-sensor-acoustic">{onlineCount}</strong>/{familySensors.length}
           </span>
           <span>
             Avg Q:{' '}
@@ -153,7 +132,7 @@ export default function SensorFamilyPanel() {
       </div>
 
       {/* Family tab strip */}
-      <div className="tab-list" style={{ flexShrink: 0 }}>
+      <div className="tab-list shrink-0">
         {ALL_FAMILIES.map((family) => {
           const color = getSensorFamilyColor(family)
           const count = Array.from(sensors.values()).filter(
@@ -170,24 +149,15 @@ export default function SensorFamilyPanel() {
               }}
             >
               <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  background: color,
-                  display: 'inline-block',
-                  marginRight: 4,
-                }}
+                className="w-1.5 h-1.5 rounded-full inline-block mr-1"
+                style={{ background: color }}
               />
               {family}
               {count > 0 && (
                 <span
+                  className="ml-1 text-[10px] px-1 rounded-lg"
                   style={{
-                    marginLeft: 4,
-                    fontSize: 10,
                     background: activeFamily === family ? `${color}22` : 'var(--bg-tertiary)',
-                    padding: '0 4px',
-                    borderRadius: 8,
                     color: activeFamily === family ? color : 'var(--text-secondary)',
                   }}
                 >
@@ -199,16 +169,14 @@ export default function SensorFamilyPanel() {
         })}
       </div>
 
-      {/* Scrollable body: waveform/spectrogram + sensor cards */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-        {/* Acoustic Spectrogram (Acoustic family only, when widget enabled) */}
+      {/* Scrollable body */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {activeFamily === 'Acoustic' && isVisible('acousticSpectrogram') && waveformSensorId && (
           <AcousticSpectrogram sensorId={waveformSensorId} />
         )}
 
-        {/* Waveform (non-Acoustic families, or Acoustic without spectrogram) */}
         {(activeFamily !== 'Acoustic' || !isVisible('acousticSpectrogram')) && waveformData.length > 1 && (
-          <div style={{ padding: '8px 12px' }}>
+          <div className="py-2 px-3">
             <WaveformChart
               data={waveformData}
               color={familyColor}
@@ -220,20 +188,12 @@ export default function SensorFamilyPanel() {
 
         {/* Sensor card grid */}
         <div
-          style={{
-            padding: 8,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-            gap: 6,
-            alignContent: 'start',
-          }}
+          className="p-2 grid gap-1.5"
+          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', alignContent: 'start' }}
         >
           {familySensors.length === 0 ? (
-            <div
-              className="no-data"
-              style={{ gridColumn: '1 / -1', height: 100 }}
-            >
-              <span className="no-data-icon" style={{ fontSize: 20 }}>📡</span>
+            <div className="no-data col-span-full h-[100px]">
+              <span className="no-data-icon text-[20px]">📡</span>
               <span>No {activeFamily} sensors</span>
             </div>
           ) : (

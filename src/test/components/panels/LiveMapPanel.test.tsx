@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 
 // Extend the react-leaflet mock to include LayersControl.BaseLayer which the
 // global setup.ts mock omits (it only mocks LayersControl as a plain wrapper).
-vi.mock('react-leaflet', async (importOriginal) => {
+vi.mock('react-leaflet', async () => {
   const React = await import('react')
   function BaseLayer({ children }: { children?: React.ReactNode }) {
     return React.createElement(React.Fragment, null, children)
@@ -30,10 +30,10 @@ vi.mock('react-leaflet', async (importOriginal) => {
   }
 })
 
-import LiveMapPanel from '../../../components/panels/LiveMapPanel'
-import { useSensorStore } from '../../../store/sensorStore'
-import { useAlertStore } from '../../../store/alertStore'
-import type { SensorPayload, Track, ThreatAssessment } from '../../../types/sensors'
+import { LiveMapPanel } from '@/components/panels/LiveMapPanel'
+import { useSensorStore } from '@/store/sensorStore'
+import { useAlertStore } from '@/store/alertStore'
+import type { SensorPayload, Track, ThreatAssessment } from '@/types/sensors'
 
 function makeSensor(id: string): SensorPayload {
   return {

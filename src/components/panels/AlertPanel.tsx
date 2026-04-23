@@ -4,9 +4,9 @@
 // ============================================================
 
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import { useAlertStore } from '../../store/alertStore'
-import AlertRow from '../widgets/AlertRow'
-import type { ThreatLevel, SensorFamily } from '../../types/sensors'
+import { useAlertStore } from '@/store/alertStore'
+import { AlertRow } from '@/components/widgets/AlertRow'
+import type { ThreatLevel, SensorFamily } from '@/types/sensors'
 
 // ── Threat level filter chips ─────────────────────────────────
 const THREAT_LEVELS: (ThreatLevel | 'ALL')[] = ['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
@@ -55,7 +55,9 @@ function AlertSparkline({ data }: SparklineProps) {
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      style={{ width: W, height: H, display: 'block' }}
+      width={W}
+      height={H}
+      className="block"
     >
       <polyline
         points={pts}
@@ -76,30 +78,8 @@ function AlertSparkline({ data }: SparklineProps) {
   )
 }
 
-// ── Panel styles ──────────────────────────────────────────────
-const panelStyle: React.CSSProperties = {
-  flex: 1,
-  minHeight: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-}
-
-const headerStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  borderBottom: '1px solid var(--border-color)',
-  fontSize: '13px',
-  fontWeight: 600,
-  color: 'var(--text-secondary)',
-  background: 'var(--panel-header-bg)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexShrink: 0,
-}
-
 // ── Main component ────────────────────────────────────────────
-export default function AlertPanel() {
+export function AlertPanel() {
   const allAlerts = useAlertStore((s) => s.alerts)
   const filter = useAlertStore((s) => s.filter)
   const setFilter = useAlertStore((s) => s.setFilter)
@@ -145,10 +125,10 @@ export default function AlertPanel() {
   ).length
 
   return (
-    <div style={panelStyle}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Header — just the sparkline + critical badge */}
-      <div style={{ ...headerStyle, padding: '4px 12px' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="py-1 px-3 border-b border-border-color text-[13px] font-semibold text-text-secondary bg-panel-header-bg flex items-center justify-between shrink-0">
+        <span className="flex items-center gap-2">
           {critCount > 0 && (
             <span
               className="badge badge-critical"
@@ -162,20 +142,9 @@ export default function AlertPanel() {
       </div>
 
       {/* Filter bar */}
-      <div
-        style={{
-          padding: '6px 12px',
-          borderBottom: '1px solid var(--border-color)',
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '6px',
-          alignItems: 'center',
-          flexShrink: 0,
-          background: 'var(--bg-secondary)',
-        }}
-      >
+      <div className="py-1.5 px-3 border-b border-border-color flex flex-wrap gap-1.5 items-center shrink-0 bg-bg-secondary">
         {/* Threat level chips */}
-        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+        <div className="flex gap-1 flex-wrap">
           {THREAT_LEVELS.map((lvl) => {
             const active = filter.threatLevel === lvl
             const color = LEVEL_COLORS[lvl] ?? 'var(--text-secondary)'
@@ -183,20 +152,11 @@ export default function AlertPanel() {
               <button
                 key={lvl}
                 onClick={() => setFilter({ threatLevel: lvl })}
+                className="text-[10px] font-bold px-[10px] h-7 rounded-full cursor-pointer tracking-[0.05em] transition-all duration-150 inline-flex items-center"
                 style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  padding: '0 10px',
-                  height: 28,
-                  borderRadius: 9999,
                   border: `1px solid ${active ? color : 'var(--border-color)'}`,
                   background: active ? `${color}22` : 'transparent',
                   color: active ? color : 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  letterSpacing: '0.05em',
-                  transition: 'all 0.15s',
-                  display: 'inline-flex',
-                  alignItems: 'center',
                 }}
               >
                 {lvl}
@@ -205,13 +165,13 @@ export default function AlertPanel() {
           })}
         </div>
 
-        <div style={{ width: 1, height: 18, background: 'var(--border-color)', flexShrink: 0 }} />
+        <div className="w-px h-[18px] bg-border-color shrink-0" />
 
         {/* Family dropdown */}
         <select
           value={filter.sensorFamily}
           onChange={(e) => setFilter({ sensorFamily: e.target.value as SensorFamily | 'ALL' })}
-          style={{ fontSize: 11, padding: '0 6px', height: 28 }}
+          className="text-[11px] px-1.5 h-7"
         >
           {FAMILIES.map((f) => (
             <option key={f} value={f}>{f}</option>
@@ -224,27 +184,20 @@ export default function AlertPanel() {
           onChange={(e) =>
             setFilter({ acknowledged: e.target.value as 'ALL' | 'UNACKED' | 'ACKED' })
           }
-          style={{ fontSize: 11, padding: '0 6px', height: 28 }}
+          className="text-[11px] px-1.5 h-7"
         >
           <option value="ALL">All</option>
           <option value="UNACKED">Unacknowledged</option>
           <option value="ACKED">Acknowledged</option>
         </select>
 
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-secondary)' }}>
+        <span className="ml-auto text-[10px] text-text-secondary">
           {displayed.length} shown
         </span>
       </div>
 
-      {/* Alert list */}
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: 'auto',
-          padding: 0,
-        }}
-      >
+      {/* Alert list — scrollable, never grows beyond its shell */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         {displayed.length === 0 ? (
           <div className="no-data">
             <span className="no-data-icon">🔕</span>

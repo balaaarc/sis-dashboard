@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SensorCard from '../../../components/widgets/SensorCard'
-import { useSensorStore } from '../../../store/sensorStore'
-import type { SensorPayload } from '../../../types/sensors'
+import { SensorCard } from '@/components/widgets/SensorCard'
+import { useSensorStore } from '@/store/sensorStore'
+import type { SensorPayload } from '@/types/sensors'
 
 function mockSensor(overrides: Partial<SensorPayload> = {}): SensorPayload {
   return {

@@ -1,6 +1,6 @@
-import { useSensorStore } from '../../store/sensorStore'
-import { formatRelativeTime, formatQualityScore } from '../../utils/formatters'
-import type { SensorStatus } from '../../types/sensors'
+import { useSensorStore } from '@/store/sensorStore'
+import { formatRelativeTime, formatQualityScore } from '@/utils/formatters'
+import type { SensorStatus } from '@/types/sensors'
 
 interface SensorCardProps {
   sensorId: string
@@ -43,16 +43,16 @@ function getFirstNumericValue(raw: Record<string, unknown>): string {
   return '—'
 }
 
-export default function SensorCard({ sensorId }: SensorCardProps) {
+export function SensorCard({ sensorId }: SensorCardProps) {
   const sensor = useSensorStore((s) => s.sensors.get(sensorId))
   const selectedId = useSensorStore((s) => s.selectedSensorId)
   const selectSensor = useSensorStore((s) => s.selectSensor)
 
   if (!sensor) {
     return (
-      <div className="sensor-card" style={{ opacity: 0.5 }}>
-        <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{sensorId}</div>
-        <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>No data</div>
+      <div className="sensor-card opacity-50">
+        <div className="text-[11px] text-text-secondary">{sensorId}</div>
+        <div className="text-[10px] text-text-secondary">No data</div>
       </div>
     )
   }
@@ -67,17 +67,9 @@ export default function SensorCard({ sensorId }: SensorCardProps) {
       onClick={() => selectSensor(isSelected ? null : sensorId)}
     >
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
+      <div className="flex items-center justify-between gap-1">
         <span
-          style={{
-            fontSize: 10,
-            fontFamily: 'monospace',
-            color: 'var(--text-secondary)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '60%',
-          }}
+          className="text-[10px] font-mono text-text-secondary overflow-hidden text-ellipsis whitespace-nowrap max-w-[60%]"
           title={sensor.sensor_id}
         >
           {sensor.sensor_id.length > 14
@@ -85,26 +77,14 @@ export default function SensorCard({ sensorId }: SensorCardProps) {
             : sensor.sensor_id}
         </span>
         {/* Modality badge */}
-        <span
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            padding: '1px 5px',
-            borderRadius: 4,
-            background: 'var(--bg-primary)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--accent-teal)',
-            flexShrink: 0,
-          }}
-        >
+        <span className="text-[10px] font-bold tracking-[0.05em] py-[1px] px-[5px] rounded bg-bg-primary border border-border-color text-accent-teal shrink-0">
           {sensor.modality}
         </span>
       </div>
 
       {/* Quality score */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <div className="progress-bar-track" style={{ flex: 1 }}>
+      <div className="flex items-center gap-1.5">
+        <div className="progress-bar-track flex-1">
           <div
             className="progress-bar-fill"
             style={{
@@ -114,51 +94,35 @@ export default function SensorCard({ sensorId }: SensorCardProps) {
           />
         </div>
         <span
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            color: qualityColor,
-            flexShrink: 0,
-            minWidth: 30,
-            textAlign: 'right',
-          }}
+          className="text-[10px] font-bold shrink-0 min-w-[30px] text-right"
+          style={{ color: qualityColor }}
         >
           {formatQualityScore(sensor.quality_score)}
         </span>
       </div>
 
       {/* Status + last seen */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="flex items-center justify-between">
         <span
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            color: statusColor,
-            letterSpacing: '0.05em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-          }}
+          className="text-[10px] font-bold tracking-[0.05em] flex items-center gap-1"
+          style={{ color: statusColor }}
         >
           <span
+            className="w-1.5 h-1.5 rounded-full inline-block shrink-0"
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
               background: statusColor,
-              display: 'inline-block',
               boxShadow: sensor.sensor_status === 'ONLINE' ? `0 0 5px ${statusColor}` : 'none',
             }}
           />
           {sensor.sensor_status}
         </span>
-        <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+        <span className="text-[10px] text-text-secondary">
           {formatRelativeTime(sensor.timestamp)}
         </span>
       </div>
 
       {/* Key value */}
-      <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+      <div className="text-[10px] text-text-secondary font-mono">
         {getFirstNumericValue(sensor.raw_value)}
       </div>
     </div>

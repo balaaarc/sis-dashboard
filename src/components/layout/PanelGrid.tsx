@@ -1,52 +1,31 @@
 import { lazy, Suspense, useEffect, useRef } from 'react'
-import PanelShell from './PanelShell'
-import PanelMiniView from '../panels/MinimizedViews'
-import { useSystemStore } from '../../store/systemStore'
-import { useSettingsStore } from '../../store/settingsStore'
-import { useViewStore } from '../../store/viewStore'
-import { useIsMobile } from '../../hooks/useIsMobile'
+import { PanelShell } from '@/components/layout/PanelShell'
+import { PanelMiniView } from '@/components/panels/MinimizedViews'
+import { useSystemStore } from '@/store/systemStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { useViewStore } from '@/store/viewStore'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
-const LiveMapPanel      = lazy(() => import('../panels/LiveMapPanel'))
-const AlertPanel        = lazy(() => import('../panels/AlertPanel'))
-const VideoPanel        = lazy(() => import('../panels/VideoPanel'))
-const SensorFamilyPanel = lazy(() => import('../panels/SensorFamilyPanel'))
-const AIMLPanel         = lazy(() => import('../panels/AIMLPanel'))
-const SystemHealthPanel = lazy(() => import('../panels/SystemHealthPanel'))
-const CounterUASPanel   = lazy(() => import('../panels/CounterUASPanel'))
-const PersonnelPanel    = lazy(() => import('../panels/PersonnelPanel'))
-const PowerPanel        = lazy(() => import('../panels/PowerPanel'))
-const CommandPanel      = lazy(() => import('../panels/CommandPanel'))
-const AdvancedAIPanel   = lazy(() => import('../panels/AdvancedAIPanel'))
-const WeatherPanel      = lazy(() => import('../panels/WeatherPanel'))
-const SettingsPanel     = lazy(() => import('../panels/SettingsPanel'))
-const DeviceConfigPage  = lazy(() => import('../pages/DeviceConfigPage'))
+const LiveMapPanel      = lazy(() => import('@/components/panels/LiveMapPanel').then((m) => ({ default: m.LiveMapPanel })))
+const AlertPanel        = lazy(() => import('@/components/panels/AlertPanel').then((m) => ({ default: m.AlertPanel })))
+const VideoPanel        = lazy(() => import('@/components/panels/VideoPanel').then((m) => ({ default: m.VideoPanel })))
+const SensorFamilyPanel = lazy(() => import('@/components/panels/SensorFamilyPanel').then((m) => ({ default: m.SensorFamilyPanel })))
+const AIMLPanel         = lazy(() => import('@/components/panels/AIMLPanel').then((m) => ({ default: m.AIMLPanel })))
+const SystemHealthPanel = lazy(() => import('@/components/panels/SystemHealthPanel').then((m) => ({ default: m.SystemHealthPanel })))
+const CounterUASPanel   = lazy(() => import('@/components/panels/CounterUASPanel').then((m) => ({ default: m.CounterUASPanel })))
+const PersonnelPanel    = lazy(() => import('@/components/panels/PersonnelPanel').then((m) => ({ default: m.PersonnelPanel })))
+const PowerPanel        = lazy(() => import('@/components/panels/PowerPanel').then((m) => ({ default: m.PowerPanel })))
+const CommandPanel      = lazy(() => import('@/components/panels/CommandPanel').then((m) => ({ default: m.CommandPanel })))
+const AdvancedAIPanel   = lazy(() => import('@/components/panels/AdvancedAIPanel').then((m) => ({ default: m.AdvancedAIPanel })))
+const WeatherPanel      = lazy(() => import('@/components/panels/WeatherPanel').then((m) => ({ default: m.WeatherPanel })))
+const SettingsPanel     = lazy(() => import('@/components/panels/SettingsPanel').then((m) => ({ default: m.SettingsPanel })))
+const DeviceConfigPage  = lazy(() => import('@/components/pages/DeviceConfigPage').then((m) => ({ default: m.DeviceConfigPage })))
 
 function PanelFallback({ name }: { name: string }) {
   return (
-    <div
-      style={{
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: 8,
-        color: 'var(--text-secondary)',
-        fontSize: 12,
-      }}
-    >
-      <div
-        style={{
-          width: 24,
-          height: 24,
-          border: '2px solid var(--accent-blue)',
-          borderTopColor: 'transparent',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite',
-        }}
-      />
+    <div className="h-full flex items-center justify-center flex-col gap-2 text-text-secondary text-[12px]">
+      <div className="w-6 h-6 border-2 border-accent-blue border-t-transparent rounded-full animate-spin" />
       <span>Loading {name}…</span>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
@@ -85,36 +64,16 @@ const CORE_GRID_AREA: Record<string, string> = {
   map: 'map', alerts: 'alert', video: 'video', sensors: 'sensors', aiml: 'aiml', health: 'health',
 }
 
-// Tooltip shown above the strip when a panel is expanded
+// Banner shown above the strip when a panel is expanded
 function ExpandedBanner({ panelTitle, onClose }: { panelTitle: string; onClose: () => void }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '3px 8px',
-        background: 'rgba(59,130,246,0.1)',
-        border: '1px solid rgba(59,130,246,0.25)',
-        borderRadius: 6,
-        fontSize: 10,
-        color: 'var(--accent-blue)',
-        flexShrink: 0,
-      }}
-    >
+    <div className="flex items-center gap-2 py-[3px] px-2 bg-[rgba(59,130,246,0.1)] border border-[rgba(59,130,246,0.25)] rounded-[6px] text-[10px] text-accent-blue shrink-0">
       <span>⤢ Expanded: <strong>{panelTitle}</strong></span>
-      <span style={{ flex: 1 }} />
+      <span className="flex-1" />
       <button
         onClick={onClose}
         title="Collapse back to grid"
-        style={{
-          border: 'none',
-          background: 'transparent',
-          color: 'var(--accent-blue)',
-          cursor: 'pointer',
-          fontSize: 11,
-          padding: '0 2px',
-        }}
+        className="border-none bg-transparent text-accent-blue cursor-pointer text-[11px] px-[2px]"
       >
         ✕ Collapse
       </button>
@@ -122,23 +81,22 @@ function ExpandedBanner({ panelTitle, onClose }: { panelTitle: string; onClose: 
   )
 }
 
-export default function PanelGrid() {
-  const activePanel   = useSystemStore((s) => s.activePanel)
-  const isPanelVisible  = useSettingsStore((s) => s.isPanelVisible)
+export function PanelGrid() {
+  const activePanel          = useSystemStore((s) => s.activePanel)
+  const isPanelVisible       = useSettingsStore((s) => s.isPanelVisible)
   const defaultExpandedPanel = useSettingsStore((s) => s.defaultExpandedPanel)
-  const expandedPanel = useViewStore((s) => s.expandedPanel)
-  const toggleExpand  = useViewStore((s) => s.toggleExpand)
-  const setPanelView  = useViewStore((s) => s.setPanelView)
-  const panelViews    = useViewStore((s) => s.panelViews)
-  const getView       = (id: string) => panelViews[id] ?? 'normal'
-  const isMobile      = useIsMobile()
+  const expandedPanel        = useViewStore((s) => s.expandedPanel)
+  const toggleExpand         = useViewStore((s) => s.toggleExpand)
+  const setPanelView         = useViewStore((s) => s.setPanelView)
+  const panelViews           = useViewStore((s) => s.panelViews)
+  const getView              = (id: string) => panelViews[id] ?? 'normal'
+  const isMobile             = useIsMobile()
 
   // Initialise default-expanded once on mount
   const didInit = useRef(false)
   useEffect(() => {
     if (!didInit.current && defaultExpandedPanel) {
       didInit.current = true
-      // Only expand if the panel is visible
       if (isPanelVisible(defaultExpandedPanel)) {
         toggleExpand(defaultExpandedPanel)
       }
@@ -151,7 +109,10 @@ export default function PanelGrid() {
   // ── Full-screen panels ────────────────────────────────────────────────────
   if (activePanel === 'settings') {
     return (
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: isMobile ? 2 : 4, minHeight: 0 }}>
+      <main
+        className="flex-1 flex overflow-hidden min-h-0"
+        style={{ padding: isMobile ? 2 : 4 }}
+      >
         <PanelShell panelId="settings" title="Dashboard Settings" icon="⚙" style={{ flex: 1 }}>
           <Suspense fallback={<PanelFallback name="Settings" />}>
             <SettingsPanel />
@@ -163,7 +124,10 @@ export default function PanelGrid() {
 
   if (activePanel === 'device') {
     return (
-      <main style={{ flex: 1, display: 'flex', overflow: 'hidden', padding: isMobile ? 2 : 4, minHeight: 0 }}>
+      <main
+        className="flex-1 flex overflow-hidden min-h-0"
+        style={{ padding: isMobile ? 2 : 4 }}
+      >
         <PanelShell panelId="device" title="SensiConnect — Device Configuration" icon="🔌" style={{ flex: 1 }}>
           <Suspense fallback={<PanelFallback name="Device Config" />}>
             <DeviceConfigPage />
@@ -174,30 +138,22 @@ export default function PanelGrid() {
   }
 
   const visiblePanels = ALL_PANELS.filter((p) => isPanelVisible(p.id))
-  const corePanels  = visiblePanels.filter((p) => CORE_IDS.includes(p.id))
-  const extraPanels = visiblePanels.filter((p) => !CORE_IDS.includes(p.id))
-  const hasAllCore  = corePanels.length === 6
-  const isActive    = (panelId: string) => SIDEBAR_TO_PANEL[activePanel] === panelId
+  const corePanels    = visiblePanels.filter((p) => CORE_IDS.includes(p.id))
+  const extraPanels   = visiblePanels.filter((p) => !CORE_IDS.includes(p.id))
+  const hasAllCore    = corePanels.length === 6
+  const isActive      = (panelId: string) => SIDEBAR_TO_PANEL[activePanel] === panelId
 
   // ── Expanded layout ──────────────────────────────────────────────────────
   if (expandedPanel) {
-    const expDef = ALL_PANELS.find((p) => p.id === expandedPanel || p.sidebarId === expandedPanel)
+    const expDef     = ALL_PANELS.find((p) => p.id === expandedPanel || p.sidebarId === expandedPanel)
     const stripPanels = visiblePanels.filter(
       (p) => p.id !== expandedPanel && p.sidebarId !== expandedPanel
     )
 
     return (
       <main
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          minHeight: 0,
-          minWidth: 0,
-          padding: 4,
-          gap: 4,
-        }}
+        className="flex-1 flex flex-col overflow-hidden min-h-0 min-w-0"
+        style={{ padding: 4, gap: 4 }}
       >
         {/* ── Info banner ─────────────────────────────────────────────── */}
         <ExpandedBanner
@@ -209,7 +165,7 @@ export default function PanelGrid() {
         {expDef && (() => {
           const Comp = expDef.component
           return (
-            <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+            <div className="flex-1 min-h-0 overflow-hidden">
               <PanelShell
                 panelId={expDef.id}
                 title={expDef.title}
@@ -229,15 +185,8 @@ export default function PanelGrid() {
         {/* ── Minimised strip ─────────────────────────────────────────── */}
         {stripPanels.length > 0 && (
           <div
-            className="panel-strip-mobile"
-            style={{
-              height: 76,
-              flexShrink: 0,
-              display: 'flex',
-              gap: 4,
-              overflowX: 'auto',
-              overflowY: 'hidden',
-            }}
+            className="panel-strip-mobile h-[76px] shrink-0 flex overflow-x-auto overflow-y-hidden"
+            style={{ gap: 4 }}
           >
             {stripPanels.map((panel) => {
               const Comp = panel.component
@@ -248,7 +197,7 @@ export default function PanelGrid() {
                   panelId={panel.id}
                   title={panel.title}
                   icon={panel.icon}
-                  forceMinimized={!isMin}  // strip mode unless user explicitly minimized
+                  forceMinimized={!isMin}
                   minimizedContent={<PanelMiniView panelId={panel.id} />}
                   highlight={isActive(panel.id)}
                   style={{ minWidth: 200, flex: '1 0 auto', height: '100%' }}
@@ -268,14 +217,9 @@ export default function PanelGrid() {
   // ── Normal grid layout ────────────────────────────────────────────────────
   return (
     <main
+      className="flex-1 min-h-0 min-w-0 flex flex-col overflow-x-hidden"
       style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        minHeight: 0,
-        minWidth: 0,
+        overflowY: extraPanels.length === 0 ? 'hidden' : 'auto',
         padding: isMobile ? 2 : 4,
         gap: isMobile ? 2 : 4,
       }}
@@ -291,11 +235,12 @@ export default function PanelGrid() {
             gridTemplateColumns: isMobile
               ? '1fr'
               : hasAllCore ? '2fr 1.5fr 1.5fr' : 'repeat(auto-fill, minmax(300px, 1fr))',
-            gridTemplateRows: (hasAllCore && !isMobile) ? 'repeat(3, minmax(300px, 1fr))' : undefined,
-            gridAutoRows: isMobile ? 'minmax(280px, auto)' : undefined,
+            gridTemplateRows: (hasAllCore && !isMobile) ? 'repeat(3, minmax(200px, 1fr))' : undefined,
+            gridAutoRows: isMobile ? 'minmax(260px, auto)' : undefined,
             gap: 4,
             flex: extraPanels.length > 0 ? '0 0 auto' : 1,
-            minHeight: extraPanels.length > 0 ? (isMobile ? 200 : 300) : 0,
+            minHeight: extraPanels.length > 0 ? (isMobile ? 200 : 260) : 0,
+            maxHeight: (hasAllCore && !isMobile && extraPanels.length === 0) ? '1208px' : undefined,
           }}
         >
           {corePanels.map((panel) => {

@@ -3,9 +3,10 @@
 // Video/imaging panel with grid modes, detection overlays, PTZ
 // ============================================================
 
-import React, { useRef, useEffect, useCallback, useState } from 'react'
-import { useSensorStore } from '../../store/sensorStore'
-import type { SensorPayload, SensorModality } from '../../types/sensors'
+import React, { useCallback, useState } from 'react'
+import { useSensorStore } from '@/store/sensorStore'
+import { useSystemStore } from '@/store/systemStore'
+import type { SensorPayload, SensorModality } from '@/types/sensors'
 
 const OPTICAL_MODALITIES: SensorModality[] = [
   'EOTS', 'THERMAL', 'PTZ', 'CCTV', 'THERMAL_NV', 'NIR_VISIBLE',
@@ -19,23 +20,30 @@ const GRID_COLS: Record<GridMode, number> = { '1x1': 1, '2x2': 2, '3x3': 3 }
 const PLACEHOLDER =
   '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAABgUEB/8QAHhAAAQQCAwEAAAAAAAAAAAAAAQIDBAUREiEx/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ALtF1q/T5KIp+s/q6Xy1AaJASAAAB//Z'
 
-function statusDotColor(sensor: SensorPayload): string {
+function statusDotClass(sensor: SensorPayload): string {
   switch (sensor.sensor_status) {
-    case 'ONLINE':      return '#10B981'
-    case 'DEGRADED':    return '#EAB308'
-    case 'OFFLINE':     return '#EF4444'
-    case 'MAINTENANCE': return '#94A3B8'
-    default:            return '#94A3B8'
+    case 'ONLINE':      return 'bg-[#10B981] shadow-[0_0_4px_#10B981]'
+    case 'DEGRADED':    return 'bg-[#EAB308]'
+    case 'OFFLINE':     return 'bg-[#EF4444]'
+    case 'MAINTENANCE': return 'bg-[#94A3B8]'
+    default:            return 'bg-[#94A3B8]'
   }
 }
 
 // ── Detection overlay SVG ─────────────────────────────────────
 // Backend format: { bbox: [x, y, w, h] (normalised 0-1), class, confidence, track_id }
+// Also supports legacy format: { x, y, width, height, label, confidence } (pixel values)
 interface Detection {
-  bbox: [number, number, number, number]
-  class: string
+  bbox?: [number, number, number, number]
+  class?: string
   confidence: number
   track_id?: string
+  // Legacy pixel-coordinate format
+  x?: number
+  y?: number
+  width?: number
+  height?: number
+  label?: string
 }
 
 interface OverlayProps {
@@ -48,17 +56,26 @@ function DetectionOverlay({ detections, frameWidth, frameHeight }: OverlayProps)
   if (!detections || detections.length === 0) return null
   return (
     <svg
-      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+      className="absolute inset-0 w-full h-full pointer-events-none"
       viewBox={`0 0 ${frameWidth} ${frameHeight}`}
       preserveAspectRatio="none"
     >
       {detections.map((det, i) => {
-        const [nx, ny, nw, nh] = det.bbox ?? [0, 0, 0, 0]
-        const px = nx * frameWidth
-        const py = ny * frameHeight
-        const pw = nw * frameWidth
-        const ph = nh * frameHeight
-        const label = det.class ?? 'UNK'
+        let px: number, py: number, pw: number, ph: number
+        if (det.bbox) {
+          const [nx, ny, nw, nh] = det.bbox
+          px = nx * frameWidth
+          py = ny * frameHeight
+          pw = nw * frameWidth
+          ph = nh * frameHeight
+        } else {
+          // Legacy pixel format
+          px = det.x ?? 0
+          py = det.y ?? 0
+          pw = det.width ?? 0
+          ph = det.height ?? 0
+        }
+        const label = det.class ?? det.label ?? 'UNK'
         const labelW = Math.max(label.length * 6 + 32, 60)
         return (
           <g key={det.track_id ?? i}>
@@ -93,40 +110,26 @@ function CameraCell({ sensor, selected, onClick, compact = false }: CameraProps)
   const frameWidth = (raw?.frame_width as number) || 320
   const frameHeight = (raw?.frame_height as number) || 180
 
-  const dotColor = statusDotColor(sensor)
-
   return (
     <div
       onClick={onClick}
-      style={{
-        position: 'relative',
-        background: '#000',
-        border: selected ? '2px solid var(--accent-blue)' : '1px solid var(--border-color)',
-        borderRadius: 4,
-        overflow: 'hidden',
-        cursor: 'pointer',
-        flex: 1,
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
+      className={[
+        'relative bg-black rounded-[4px] overflow-hidden cursor-pointer flex-1 min-h-0 flex flex-col',
+        selected ? 'border-2 border-accent-blue' : 'border border-border-color',
+      ].join(' ')}
     >
       {/* Video frame */}
-      <div style={{ position: 'relative', flex: 1, overflow: 'hidden', background: '#0a0a0f' }}>
-        {hasFrame ? (
-          <img
-            src={`data:image/jpeg;base64,${frameB64}`}
-            alt={sensor.sensor_id}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div style={{
-            width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: 6,
-            color: 'var(--text-secondary)', fontSize: 10,
-          }}>
-            <span style={{ fontSize: 18, opacity: 0.4 }}>📷</span>
-            <span style={{ opacity: 0.5 }}>Awaiting feed…</span>
+      <div className="relative flex-1 overflow-hidden bg-[#0a0a0f]">
+        <img
+          src={hasFrame ? `data:image/jpeg;base64,${frameB64}` : `data:image/jpeg;base64,${PLACEHOLDER}`}
+          alt={sensor.sensor_id}
+          className="w-full h-full object-cover block"
+          style={hasFrame ? undefined : { opacity: 0.25, filter: 'grayscale(1)' }}
+        />
+        {!hasFrame && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-text-secondary text-[10px] pointer-events-none">
+            <span className="text-lg opacity-40">📷</span>
+            <span className="opacity-50">Awaiting feed...</span>
           </div>
         )}
         <DetectionOverlay
@@ -137,48 +140,21 @@ function CameraCell({ sensor, selected, onClick, compact = false }: CameraProps)
       </div>
       {/* Label bar */}
       <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: 'rgba(0,0,0,0.65)',
-          padding: compact ? '2px 6px' : '3px 8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 5,
-        }}
+        className={[
+          'absolute bottom-0 left-0 right-0 bg-black/65 flex items-center gap-[5px]',
+          compact ? 'py-[2px] px-[6px]' : 'py-[3px] px-[8px]',
+        ].join(' ')}
       >
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDotClass(sensor)}`} />
         <span
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: '50%',
-            background: dotColor,
-            flexShrink: 0,
-            boxShadow: sensor.sensor_status === 'ONLINE' ? `0 0 4px ${dotColor}` : 'none',
-          }}
-        />
-        <span
-          style={{
-            fontSize: compact ? 9 : 10,
-            color: 'rgba(255,255,255,0.85)',
-            fontFamily: 'monospace',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
+          className={[
+            'overflow-hidden text-ellipsis whitespace-nowrap font-mono text-white/85',
+            compact ? 'text-[9px]' : 'text-[10px]',
+          ].join(' ')}
         >
           {sensor.sensor_id}
         </span>
-        <span
-          style={{
-            fontSize: 10,
-            color: 'var(--accent-teal)',
-            marginLeft: 'auto',
-            flexShrink: 0,
-          }}
-        >
+        <span className="text-[10px] text-accent-teal ml-auto shrink-0">
           {sensor.modality}
         </span>
       </div>
@@ -189,70 +165,39 @@ function CameraCell({ sensor, selected, onClick, compact = false }: CameraProps)
 // ── PTZ Controls ──────────────────────────────────────────────
 interface PTZProps {
   sensorId: string
-  wsRef: React.RefObject<WebSocket | null>
+  sendMessage: (msg: object) => void
 }
 
-function PTZControls({ sensorId, wsRef }: PTZProps) {
+function PTZControls({ sensorId, sendMessage }: PTZProps) {
   const sendPTZ = useCallback(
     (command: string) => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        wsRef.current.send(
-          JSON.stringify({
-            type: 'PTZ_CONTROL',
-            payload: { sensor_id: sensorId, command, speed: 1.0 },
-          })
-        )
-      }
+      sendMessage({
+        type: 'PTZ_CONTROL',
+        payload: { sensor_id: sensorId, command, speed: 1.0 },
+      })
     },
-    [sensorId, wsRef]
+    [sensorId, sendMessage]
   )
 
-  const btnStyle: React.CSSProperties = {
-    width: 32,
-    height: 32,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'var(--bg-tertiary)',
-    border: '1px solid var(--border-color)',
-    borderRadius: 4,
-    cursor: 'pointer',
-    color: 'var(--text-primary)',
-    fontSize: 14,
-    transition: 'all 0.1s',
-    userSelect: 'none',
-  }
+  const btnCls = 'w-8 h-8 flex items-center justify-center bg-bg-tertiary border border-border-color rounded cursor-pointer text-text-primary text-sm transition-all duration-100 select-none'
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 4,
-        padding: 8,
-        background: 'var(--bg-secondary)',
-        borderTop: '1px solid var(--border-color)',
-        flexShrink: 0,
-      }}
-    >
-      <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginBottom: 2 }}>
-        PTZ: {sensorId}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '32px 32px 32px', gap: 4 }}>
+    <div className="flex flex-col items-center gap-1 p-2 bg-bg-secondary border-t border-border-color shrink-0">
+      <div className="text-[10px] text-text-secondary mb-0.5">PTZ: {sensorId}</div>
+      <div className="grid gap-1" style={{ gridTemplateColumns: '32px 32px 32px' }}>
         <div />
-        <button style={btnStyle} onClick={() => sendPTZ('TILT_UP')} title="Tilt Up">↑</button>
+        <button className={btnCls} onClick={() => sendPTZ('TILT_UP')} title="Tilt Up">↑</button>
         <div />
-        <button style={btnStyle} onClick={() => sendPTZ('PAN_LEFT')} title="Pan Left">←</button>
-        <button style={btnStyle} onClick={() => sendPTZ('STOP')} title="Stop" aria-label="Stop">■</button>
-        <button style={btnStyle} onClick={() => sendPTZ('PAN_RIGHT')} title="Pan Right">→</button>
+        <button className={btnCls} onClick={() => sendPTZ('PAN_LEFT')} title="Pan Left">←</button>
+        <button className={btnCls} onClick={() => sendPTZ('STOP')} title="Stop" aria-label="Stop">■</button>
+        <button className={btnCls} onClick={() => sendPTZ('PAN_RIGHT')} title="Pan Right">→</button>
         <div />
-        <button style={btnStyle} onClick={() => sendPTZ('TILT_DOWN')} title="Tilt Down">↓</button>
+        <button className={btnCls} onClick={() => sendPTZ('TILT_DOWN')} title="Tilt Down">↓</button>
         <div />
       </div>
-      <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
-        <button style={btnStyle} onClick={() => sendPTZ('ZOOM_IN')} title="Zoom In">+</button>
-        <button style={btnStyle} onClick={() => sendPTZ('ZOOM_OUT')} title="Zoom Out">−</button>
+      <div className="flex gap-1 mt-0.5">
+        <button className={btnCls} onClick={() => sendPTZ('ZOOM_IN')} title="Zoom In">+</button>
+        <button className={btnCls} onClick={() => sendPTZ('ZOOM_OUT')} title="Zoom Out">−</button>
       </div>
     </div>
   )
@@ -276,22 +221,11 @@ function captureFrame(sensorId: string, b64: string) {
 }
 
 // ── Main panel ────────────────────────────────────────────────
-export default function VideoPanel() {
+export function VideoPanel() {
   const sensors = useSensorStore((s) => s.sensors)
+  const sendMessage = useSystemStore((s) => s.sendMessage)
   const [gridMode, setGridMode] = useState<GridMode>('2x2')
   const [selectedIdx, setSelectedIdx] = useState(0)
-
-  const wsRef = useRef<WebSocket | null>(null)
-
-  useEffect(() => {
-    const url = (import.meta.env.VITE_WS_URL as string) ?? 'ws://localhost:4000'
-    try {
-      wsRef.current = new WebSocket(url)
-    } catch {
-      // WS not available
-    }
-    return () => wsRef.current?.close()
-  }, [])
 
   const opticalSensors = Array.from(sensors.values()).filter((s) =>
     OPTICAL_MODALITIES.includes(s.modality)
@@ -304,56 +238,31 @@ export default function VideoPanel() {
       : opticalSensors.slice(0, cols * cols)
 
   const selectedSensor = opticalSensors[selectedIdx]
-  const isPTZ = selectedSensor?.modality === 'PTZ'
 
   const modeBtn = (mode: GridMode) => (
     <button
       key={mode}
       onClick={() => setGridMode(mode)}
-      style={{
-        fontSize: 10,
-        padding: '2px 7px',
-        borderRadius: 4,
-        border: `1px solid ${gridMode === mode ? 'var(--accent-blue)' : 'var(--border-color)'}`,
-        background: gridMode === mode ? 'rgba(59,130,246,0.15)' : 'transparent',
-        color: gridMode === mode ? 'var(--accent-blue)' : 'var(--text-secondary)',
-        cursor: 'pointer',
-        fontWeight: 600,
-      }}
+      className={[
+        'text-[10px] py-[2px] px-[7px] rounded cursor-pointer font-semibold border transition-colors',
+        gridMode === mode
+          ? 'border-accent-blue bg-accent-blue-dim text-accent-blue'
+          : 'border-border-color bg-transparent text-text-secondary',
+      ].join(' ')}
     >
       {mode}
     </button>
   )
 
   return (
-    <div
-      style={{
-        flex: 1,
-        minHeight: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <div
-        style={{
-          padding: '4px 8px',
-          borderBottom: '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          flexShrink: 0,
-          gap: 4,
-        }}
-      >
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+      <div className="py-1 px-2 border-b border-border-color bg-bg-secondary flex items-center justify-end shrink-0 gap-1">
+        <div className="flex gap-1 items-center">
           {(['1x1', '2x2', '3x3'] as GridMode[]).map(modeBtn)}
           {selectedSensor && (
             <button
-              className="btn btn-ghost"
-              style={{ fontSize: 10, padding: '2px 8px', marginLeft: 4 }}
+              className="btn btn-ghost text-[10px] py-[2px] px-2 ml-1"
               onClick={() => {
                 const raw = selectedSensor.raw_value as Record<string, unknown>
                 const b64 = (raw?.frame_jpeg_b64 as string) || PLACEHOLDER
@@ -368,32 +277,15 @@ export default function VideoPanel() {
 
       {/* Camera grid */}
       <div
+        className="flex-1 grid gap-[2px] p-1 overflow-hidden min-h-0"
         style={{
-          flex: 1,
-          display: 'grid',
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           gridTemplateRows: `repeat(${cols}, 1fr)`,
-          gap: 2,
-          padding: 4,
-          overflow: 'hidden',
-          minHeight: 0,
         }}
       >
         {opticalSensors.length === 0 ? (
-          <div
-            style={{
-              gridColumn: `1 / -1`,
-              gridRow: `1 / -1`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: 8,
-              color: 'var(--text-secondary)',
-              fontSize: 13,
-            }}
-          >
-            <span style={{ fontSize: 32, opacity: 0.4 }}>📷</span>
+          <div className="col-span-full row-span-full flex items-center justify-center flex-col gap-2 text-text-secondary text-[13px]">
+            <span className="text-3xl opacity-40">📷</span>
             <span>Awaiting sensor data...</span>
           </div>
         ) : (
@@ -411,7 +303,7 @@ export default function VideoPanel() {
 
       {/* PTZ controls (1x1 mode only) */}
       {gridMode === '1x1' && selectedSensor && (
-        <PTZControls sensorId={selectedSensor.sensor_id} wsRef={wsRef} />
+        <PTZControls sensorId={selectedSensor.sensor_id} sendMessage={sendMessage} />
       )}
     </div>
   )

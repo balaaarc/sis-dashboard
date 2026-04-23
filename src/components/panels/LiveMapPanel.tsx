@@ -16,12 +16,11 @@ import {
   TileLayer,
   LayersControl,
   Polygon,
-  useMap,
 } from 'react-leaflet'
-import { useSensorStore } from '../../store/sensorStore'
-import { useAlertStore } from '../../store/alertStore'
-import SensorMarker from '../map/SensorMarker'
-import TrackMarker from '../map/TrackMarker'
+import { useSensorStore } from '@/store/sensorStore'
+import { useAlertStore } from '@/store/alertStore'
+import { SensorMarker } from '@/components/map/SensorMarker'
+import { TrackMarker } from '@/components/map/TrackMarker'
 
 // ── Hardcoded alert zones ────────────────────────────────────
 const ZONE_A: [number, number][] = [
@@ -38,44 +37,7 @@ const ZONE_B: [number, number][] = [
   [21.94, 88.15],
 ]
 
-// ── Map bounds auto-fit helper ───────────────────────────────
-const FIT_BOUNDS_PADDING: [number, number] = [20, 20]
-
-// ── Panel styles ─────────────────────────────────────────────
-const panelStyle: React.CSSProperties = {
-  flex: 1,
-  minHeight: 0,
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
-}
-
-const headerStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  borderBottom: '1px solid var(--border-color)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexShrink: 0,
-  background: 'var(--panel-header-bg)',
-}
-
-const titleStyle: React.CSSProperties = {
-  fontSize: '13px',
-  fontWeight: 600,
-  color: 'var(--text-secondary)',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-}
-
-const badgeStyle: React.CSSProperties = {
-  fontSize: '10px',
-  fontWeight: 700,
-  padding: '1px 7px',
-  borderRadius: 9999,
-  border: '1px solid',
-}
+const badgeCls = 'text-[10px] font-bold py-[1px] px-[7px] rounded-full border'
 
 // ── Inner component that reads stores (must be inside MapContainer tree sibling) ──
 function MapOverlays() {
@@ -127,7 +89,7 @@ function MapOverlays() {
 }
 
 // ── Main panel component ─────────────────────────────────────
-export default function LiveMapPanel() {
+export function LiveMapPanel() {
   const sensors = useSensorStore((s) => s.sensors)
   const tracks = useSensorStore((s) => s.tracks)
 
@@ -135,43 +97,36 @@ export default function LiveMapPanel() {
   const trackCount = tracks.length
 
   return (
-    <div style={panelStyle}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <span className="sr-only">Live Tactical Map</span>
       {/* Stats bar */}
-      <div style={{ ...headerStyle, padding: '4px 12px' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="py-1 px-3 border-b border-border-color flex items-center justify-between shrink-0 bg-panel-header-bg">
+        <span className="flex items-center gap-1.5">
           <span
-            style={{
-              ...badgeStyle,
-              color: 'var(--sensor-optical)',
-              borderColor: 'var(--sensor-optical)',
-              background: 'rgba(14,165,233,0.1)',
-            }}
+            className={badgeCls}
+            style={{ color: 'var(--sensor-optical)', borderColor: 'var(--sensor-optical)', background: 'rgba(14,165,233,0.1)' }}
           >
             {sensorCount} sensors
           </span>
           <span
-            style={{
-              ...badgeStyle,
-              color: 'var(--alert-high)',
-              borderColor: 'var(--alert-high)',
-              background: 'rgba(249,115,22,0.1)',
-            }}
+            className={badgeCls}
+            style={{ color: 'var(--alert-high)', borderColor: 'var(--alert-high)', background: 'rgba(249,115,22,0.1)' }}
           >
             {trackCount} tracks
           </span>
         </span>
-        <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-secondary)' }}>
-          <span style={{ color: '#10B981' }}>■ Zone A</span>
-          <span style={{ color: '#F59E0B' }}>■ Zone B</span>
+        <div className="flex gap-2 text-[10px] text-text-secondary">
+          <span className="text-[#10B981]">■ Zone A</span>
+          <span className="text-[#F59E0B]">■ Zone B</span>
         </div>
       </div>
 
       {/* Map body */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+      <div className="flex-1 relative overflow-hidden">
         <MapContainer
           center={[21.9452, 88.1234]}
           zoom={12}
-          style={{ height: '100%', width: '100%' }}
+          className="h-full w-full"
           zoomControl
           attributionControl={false}
         >

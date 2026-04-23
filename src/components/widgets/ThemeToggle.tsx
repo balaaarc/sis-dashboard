@@ -1,6 +1,6 @@
-import { useSystemStore } from '../../store/systemStore'
+import { useSystemStore } from '@/store/systemStore'
 
-export default function ThemeToggle() {
+export function ThemeToggle() {
   const theme = useSystemStore((s) => s.theme)
   const toggleTheme = useSystemStore((s) => s.toggleTheme)
 
@@ -8,27 +8,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      style={{
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        border: '1px solid var(--border-color)',
-        background: 'var(--bg-tertiary)',
-        color: 'var(--text-primary)',
-        cursor: 'pointer',
-        fontSize: 16,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'background 0.15s ease',
-        flexShrink: 0,
-      }}
-      onMouseEnter={(e) => {
-        ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--border-color)'
-      }}
-      onMouseLeave={(e) => {
-        ;(e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-tertiary)'
-      }}
+      className="w-8 h-8 rounded-lg border border-border-color bg-bg-tertiary text-text-primary cursor-pointer text-base flex items-center justify-center transition-colors duration-150 shrink-0 hover:bg-[var(--border-color)]"
     >
       {theme === 'dark' ? '☀' : '☽'}
     </button>

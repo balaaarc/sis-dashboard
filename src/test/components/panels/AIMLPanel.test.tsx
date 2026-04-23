@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import AIMLPanel from '../../../components/panels/AIMLPanel'
-import { useAlertStore } from '../../../store/alertStore'
-import { useSensorStore } from '../../../store/sensorStore'
-import type { ThreatAssessment, Track } from '../../../types/sensors'
+import { AIMLPanel } from '@/components/panels/AIMLPanel'
+import { useAlertStore } from '@/store/alertStore'
+import { useSensorStore } from '@/store/sensorStore'
+import type { ThreatAssessment, Track } from '@/types/sensors'
 
 const mockAssessment: ThreatAssessment = {
   assessment_id: 'ta-001',

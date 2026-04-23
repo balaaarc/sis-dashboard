@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from 'react'
-import { useViewStore } from '../../store/viewStore'
+import { useViewStore } from '@/store/viewStore'
 
 // ── Error boundary so a crashing panel doesn't take down the whole app ────────
 class PanelErrorBoundary extends Component<
@@ -11,14 +11,14 @@ class PanelErrorBoundary extends Component<
   render() {
     if (this.state.error) {
       return (
-        <div style={{ padding: 16, fontSize: 11, color: 'var(--alert-high)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div className="p-4 text-[11px] text-alert-high flex flex-col gap-1.5">
           <strong>⚠ {this.props.name} error</strong>
-          <span style={{ color: 'var(--text-secondary)', fontFamily: 'monospace', fontSize: 10 }}>
+          <span className="text-text-secondary font-mono text-[10px]">
             {(this.state.error as Error).message}
           </span>
           <button
             onClick={() => this.setState({ error: null })}
-            style={{ alignSelf: 'flex-start', padding: '3px 8px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 4, color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 10 }}
+            className="self-start py-[3px] px-2 bg-bg-tertiary border border-border-color rounded text-text-secondary cursor-pointer text-[10px]"
           >
             Retry
           </button>
@@ -98,19 +98,11 @@ function HeaderBtn({
       onClick={onClick}
       title={title}
       aria-label={title}
+      className="w-[26px] h-[26px] rounded-[5px] cursor-pointer flex items-center justify-center transition-all duration-150 shrink-0"
       style={{
-        width: 26,
-        height: 26,
-        borderRadius: 5,
         border: active ? '1px solid rgba(59,130,246,0.5)' : '1px solid transparent',
         background: active ? 'rgba(59,130,246,0.15)' : 'transparent',
         color: active ? 'var(--accent-blue)' : 'var(--text-muted)',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'all 0.15s',
-        flexShrink: 0,
       }}
       onMouseEnter={(e) => {
         if (!active) {
@@ -130,7 +122,7 @@ function HeaderBtn({
   )
 }
 
-export default function PanelShell({
+export function PanelShell({
   panelId,
   title,
   icon,
@@ -143,105 +135,69 @@ export default function PanelShell({
   forceMinimized = false,
   id,
 }: PanelShellProps) {
-  // Subscribe directly to the value so the component re-renders on change
-  const view         = useViewStore((s) => s.panelViews[panelId] ?? 'normal')
+  const view           = useViewStore((s) => s.panelViews[panelId] ?? 'normal')
   const toggleExpand   = useViewStore((s) => s.toggleExpand)
   const toggleMinimize = useViewStore((s) => s.toggleMinimize)
   const setPanelView   = useViewStore((s) => s.setPanelView)
   const isMinimized = view === 'minimized'
   const isExpanded  = view === 'expanded'
-
-  // forceMinimized = another panel is in expanded state, this one sits in the strip
   const showMinimized = forceMinimized || isMinimized
 
   const handleHeaderClick = () => {
-    if (forceMinimized) return // clicking the strip header does nothing (use expand button)
+    if (forceMinimized) return
     if (isMinimized) setPanelView(panelId, 'normal')
   }
+
+  const accentActive = isExpanded || highlight
 
   return (
     <div
       id={id}
+      className="flex flex-col overflow-hidden min-h-0 transition-[border-color,box-shadow,background] duration-200 ease-[ease]"
       style={{
-        gridArea: gridArea,
+        gridArea,
         background: 'var(--panel-bg)',
-        border:
-          isExpanded || highlight
-            ? '1px solid rgba(59,130,246,0.45)'
-            : '1px solid var(--panel-border)',
+        border: accentActive
+          ? '1px solid rgba(59,130,246,0.45)'
+          : '1px solid var(--panel-border)',
         borderRadius: 'var(--radius-lg)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        boxShadow:
-          isExpanded || highlight
-            ? '0 0 0 1px rgba(59,130,246,0.2), var(--shadow-panel)'
-            : 'var(--shadow-panel)',
+        boxShadow: accentActive
+          ? '0 0 0 1px rgba(59,130,246,0.2), var(--shadow-panel)'
+          : 'var(--shadow-panel)',
         backdropFilter: 'blur(12px)',
-        transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background 0.3s ease',
-        minHeight: 0,
         ...style,
       }}
     >
       {/* ── Active accent line ──────────────────────────────────────── */}
-      {(isExpanded || highlight) && (
-        <div style={{
-          height: 2,
-          background: 'linear-gradient(90deg, var(--accent-blue), rgba(59,130,246,0.3))',
-          flexShrink: 0,
-        }} />
+      {accentActive && (
+        <div
+          className="h-[2px] shrink-0"
+          style={{ background: 'linear-gradient(90deg, var(--accent-blue), rgba(59,130,246,0.3))' }}
+        />
       )}
 
       {/* ── Panel Header ─────────────────────────────────────────────── */}
       <div
         onClick={handleHeaderClick}
+        className="flex items-center justify-between shrink-0 pr-[10px] pl-3 select-none"
         style={{
           background: 'var(--panel-header-bg)',
           borderBottom: showMinimized ? 'none' : '1px solid var(--panel-border)',
-          padding: '0 10px 0 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
           minHeight: 'var(--panel-header-height)',
           cursor: isMinimized ? 'pointer' : 'default',
-          userSelect: 'none',
         }}
       >
         {/* Title */}
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 7,
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.07em',
-            textTransform: 'uppercase',
-            color: (isExpanded || highlight) ? 'var(--text-primary)' : 'rgba(232,240,248,0.7)',
-            flex: 1,
-            minWidth: 0,
-            transition: 'color 0.2s ease',
-          }}
+          className="flex items-center gap-[7px] text-[11px] font-bold tracking-[0.07em] uppercase flex-1 min-w-0 transition-colors duration-200"
+          style={{ color: accentActive ? 'var(--text-primary)' : 'rgba(232,240,248,0.7)' }}
         >
-          {icon && <span style={{ fontSize: 14, flexShrink: 0, opacity: 0.9 }}>{icon}</span>}
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {icon && <span className="text-[14px] shrink-0 opacity-90">{icon}</span>}
+          <span className="overflow-hidden text-ellipsis whitespace-nowrap">
             {title}
           </span>
           {isExpanded && (
-            <span
-              style={{
-                fontSize: 9,
-                background: 'rgba(59,130,246,0.18)',
-                color: 'var(--accent-blue)',
-                border: '1px solid rgba(59,130,246,0.35)',
-                borderRadius: 3,
-                padding: '1px 5px',
-                letterSpacing: '0.08em',
-                flexShrink: 0,
-                fontWeight: 700,
-              }}
-            >
+            <span className="text-[9px] bg-[rgba(59,130,246,0.18)] text-accent-blue border border-[rgba(59,130,246,0.35)] rounded-[3px] py-[1px] px-[5px] tracking-[0.08em] shrink-0 font-bold">
               EXPANDED
             </span>
           )}
@@ -249,7 +205,7 @@ export default function PanelShell({
 
         {/* Controls */}
         <div
-          style={{ display: 'flex', alignItems: 'center', gap: 2 }}
+          className="flex items-center gap-[2px]"
           onClick={(e) => e.stopPropagation()}
         >
           {headerExtra}
@@ -257,7 +213,7 @@ export default function PanelShell({
           {/* Minimize / Restore button — not shown in forceMinimized strip */}
           {!forceMinimized && (
             <HeaderBtn
-              title={isMinimized ? 'Restore panel' : 'Minimize panel'}
+              title={isMinimized ? 'Maximize' : 'Minimize'}
               onClick={() => toggleMinimize(panelId)}
             >
               {isMinimized ? <IconRestore /> : <IconMinimize />}
@@ -279,22 +235,10 @@ export default function PanelShell({
 
       {/* ── Minimized strip: priority data only ──────────────────────── */}
       {showMinimized && (
-        <div
-          style={{
-            padding: '5px 10px',
-            fontSize: 11,
-            color: 'var(--text-secondary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            flexWrap: 'nowrap',
-            overflow: 'hidden',
-            flex: 1,
-          }}
-        >
+        <div className="py-[5px] px-[10px] text-[11px] text-text-secondary flex items-center gap-[10px] flex-nowrap overflow-hidden flex-1">
           <PanelErrorBoundary name={title}>
             {minimizedContent ?? (
-              <span style={{ opacity: 0.5, fontSize: 10 }}>Click ⤢ to expand</span>
+              <span className="opacity-50 text-[10px]">Click ⤢ to expand</span>
             )}
           </PanelErrorBoundary>
         </div>
@@ -302,16 +246,7 @@ export default function PanelShell({
 
       {/* ── Full body ────────────────────────────────────────────────── */}
       {!showMinimized && (
-        <div
-          style={{
-            flex: 1,
-            overflow: 'hidden',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: 0,
-          }}
-        >
+        <div className="flex-1 overflow-hidden relative flex flex-col min-h-0">
           <PanelErrorBoundary name={title}>
             {children}
           </PanelErrorBoundary>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { Alert } from '../../types/sensors'
-import { formatRelativeTime, getThreatLevelColor } from '../../utils/formatters'
+import type { Alert } from '@/types/sensors'
+import { formatRelativeTime, getThreatLevelColor } from '@/utils/formatters'
 
 interface AlertRowProps {
   alert: Alert
@@ -9,13 +9,13 @@ interface AlertRowProps {
 
 const LEVEL_INITIAL: Record<string, string> = {
   CRITICAL: 'C',
-  HIGH: 'H',
-  MEDIUM: 'M',
-  LOW: 'L',
-  CLEAR: '—',
+  HIGH:     'H',
+  MEDIUM:   'M',
+  LOW:      'L',
+  CLEAR:    '—',
 }
 
-export default function AlertRow({ alert, onAck }: AlertRowProps) {
+export function AlertRow({ alert, onAck }: AlertRowProps) {
   const [ackComment, setAckComment] = useState('')
   const [showAckInput, setShowAckInput] = useState(false)
 
@@ -35,84 +35,43 @@ export default function AlertRow({ alert, onAck }: AlertRowProps) {
 
   return (
     <div
-      className={`alert-row ${alert.threat_level.toLowerCase()}${alert.acknowledged ? ' acknowledged' : ''} animate-mount`}
-      style={{ flexDirection: 'column', gap: 0, padding: 0 }}
+      className={`alert-row ${alert.threat_level.toLowerCase()}${alert.acknowledged ? ' acknowledged' : ''} animate-mount flex-col gap-0 p-0`}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 12px' }}>
+      <div className="flex items-start gap-2 py-2 px-3">
         {/* Severity badge */}
         <div
+          className="w-6 h-6 rounded flex items-center justify-center text-[11px] font-black shrink-0 mt-[1px]"
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: 4,
             background: `${levelColor}22`,
             border: `1px solid ${levelColor}66`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 11,
-            fontWeight: 900,
             color: levelColor,
-            flexShrink: 0,
-            marginTop: 1,
           }}
         >
           {initial}
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-semibold text-text-primary overflow-hidden text-ellipsis whitespace-nowrap">
             {alert.classification}
           </div>
           <div
-            style={{
-              fontSize: 11,
-              color: 'var(--text-secondary)',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              marginTop: 1,
-            }}
+            className="text-[11px] text-text-secondary overflow-hidden text-ellipsis whitespace-nowrap mt-[1px]"
             title={alert.description}
           >
             {alert.description}
           </div>
-          <div
-            style={{
-              display: 'flex',
-              gap: 8,
-              marginTop: 4,
-              flexWrap: 'wrap',
-            }}
-          >
+          <div className="flex gap-2 mt-1 flex-wrap">
             {alert.source_sensors.slice(0, 3).map((s) => (
               <span
                 key={s}
-                style={{
-                  fontSize: 10,
-                  fontFamily: 'monospace',
-                  color: 'var(--accent-teal)',
-                  background: 'var(--bg-primary)',
-                  padding: '1px 4px',
-                  borderRadius: 3,
-                  border: '1px solid var(--border-color)',
-                }}
+                className="text-[10px] font-mono text-accent-teal bg-bg-primary py-[1px] px-1 rounded-[3px] border border-border-color"
               >
                 {s}
               </span>
             ))}
             {alert.source_sensors.length > 3 && (
-              <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+              <span className="text-[10px] text-text-secondary">
                 +{alert.source_sensors.length - 3}
               </span>
             )}
@@ -120,35 +79,32 @@ export default function AlertRow({ alert, onAck }: AlertRowProps) {
         </div>
 
         {/* Right side */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-          <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <span className="text-[10px] text-text-secondary">
             {formatRelativeTime(alert.timestamp)}
           </span>
           {!alert.acknowledged ? (
             <button
               onClick={(e) => { e.stopPropagation(); handleAckClick() }}
-              className="btn btn-ghost"
-              style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4 }}
+              className="btn btn-ghost text-[10px] py-[2px] px-2 rounded"
             >
               {showAckInput ? 'Confirm' : 'ACK'}
             </button>
           ) : (
-            <span style={{ fontSize: 10, color: 'var(--sensor-acoustic)', fontWeight: 600 }}>
-              ACKED
-            </span>
+            <span className="text-[10px] text-sensor-acoustic font-semibold">ACKED</span>
           )}
         </div>
       </div>
 
       {/* Ack comment input */}
       {showAckInput && !alert.acknowledged && (
-        <div style={{ padding: '0 12px 8px 12px', display: 'flex', gap: 6 }}>
+        <div className="px-3 pb-2 flex gap-1.5">
           <input
             autoFocus
             value={ackComment}
             onChange={(e) => setAckComment(e.target.value)}
             placeholder="Comment (optional)..."
-            style={{ flex: 1, fontSize: 11 }}
+            className="flex-1 text-[11px]"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleAckClick()
               if (e.key === 'Escape') { setShowAckInput(false); setAckComment('') }
@@ -156,8 +112,7 @@ export default function AlertRow({ alert, onAck }: AlertRowProps) {
           />
           <button
             onClick={(e) => { e.stopPropagation(); setShowAckInput(false); setAckComment('') }}
-            className="btn btn-ghost"
-            style={{ fontSize: 10, padding: '2px 6px' }}
+            className="btn btn-ghost text-[10px] py-[2px] px-1.5"
           >
             ✕
           </button>
@@ -166,7 +121,7 @@ export default function AlertRow({ alert, onAck }: AlertRowProps) {
 
       {/* Annotation */}
       {alert.acknowledged && alert.annotation && (
-        <div style={{ padding: '0 12px 6px 44px', fontSize: 10, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+        <div className="px-3 pb-1.5 pl-11 text-[10px] text-text-secondary italic">
           "{alert.annotation}"
         </div>
       )}
